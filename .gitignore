@@ -1,0 +1,39 @@
+# ============================================================
+# Fichiers à ignorer par Git
+# ============================================================
+
+# Fichiers temporaires LaTeX
+*.aux
+*.log
+*.toc
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.nav
+*.snm
+*.vrb
+*.bbl
+*.blg
+*.idx
+*.ilg
+*.ind
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.swp
+*.swo
+
+# Fichiers temporaires Jekyll
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
+
+# Éditeurs
+.vscode/
+.idea/

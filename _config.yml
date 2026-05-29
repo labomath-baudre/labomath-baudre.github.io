@@ -1,0 +1,18 @@
+title: LaboMath
+description: Ressources mathématiques — Lycée de Baudre
+url: "https://labomath-baudre.github.io"
+baseurl: ""
+
+# Langue
+lang: fr
+
+# Format des dates en français
+date_format: "%-d %B %Y"
+
+# Moteur Markdown
+markdown: kramdown
+
+# Fichiers à exclure de la compilation
+exclude:
+  - README.md
+  - .gitignore
