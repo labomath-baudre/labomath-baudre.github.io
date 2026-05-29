@@ -34,4 +34,34 @@ body { font-family: var(--police-corps); font-size: 16px; line-height: 1.7; colo
 .site-content { padding: 2.5rem 0 3.5rem; min-height: 60vh; }
 .site-content h1 { font-family: var(--police-titre); font-size: 2.4rem; font-weight: 500; color: var(--couleur-texte); margin-bottom: 1.25rem; line-height: 1.15; }
 .site-content h2 { font-family: var(--police-titre); font-size: 1.6rem; font-weight: 500; color: var(--couleur-texte); margin: 2.5rem 0 0.5rem; }
-.site-content h3 { font-family: var(--police-corps); font-size: 1
+.site-content h3 { font-family: var(--police-corps); font-size: 1.05rem; font-weight: 500; margin: 1.5rem 0 0.5rem; }
+.site-content p { margin-bottom: 1.1rem; color: var(--couleur-texte-secondaire); }
+.site-content a { color: var(--couleur-accent); text-decoration: underline; }
+.site-content .sous-titre { margin-top: 0; margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--couleur-texte-tertiaire); }
+
+.separateur { text-align: center; margin: 2.5rem 0; color: var(--couleur-accent-or); font-family: var(--police-titre); font-size: 1.4rem; }
+
+.actualite { background: var(--couleur-actu-fond); padding: 1rem 1.25rem; margin: 2rem 0; border-radius: 2px; }
+.actualite-titre { font-size: 0.72rem; font-weight: 500; color: var(--couleur-actu-titre); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.3rem; }
+.actualite p { margin-bottom: 0; color: var(--couleur-actu-texte); font-size: 0.95rem; }
+
+.cartes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0 2rem; }
+.carte { display: block; background: var(--couleur-fond-blanc); border: 1px solid var(--couleur-bordure); border-radius: 3px; padding: 1.1rem 1.3rem 1.2rem; text-decoration: none !important; color: inherit; transition: border-color 0.15s, transform 0.15s; }
+.carte:hover { border-color: var(--couleur-accent); transform: translateY(-2px); }
+.carte .symbole { font-family: var(--police-titre); font-size: 1.8rem; color: var(--couleur-accent-or); display: block; margin: 0 0 0.4rem; line-height: 1; }
+.carte h3 { font-family: var(--police-titre); font-size: 1.25rem; font-weight: 500; color: var(--couleur-accent); margin: 0 0 0.3rem; }
+.carte p { color: var(--couleur-texte-tertiaire); font-size: 0.88rem; margin: 0; line-height: 1.5; }
+
+.niveau-entete { margin-bottom: 0.5rem; }
+.niveau-entete .symbole { font-family: var(--police-titre); font-size: 3rem; color: var(--couleur-accent-or); line-height: 1; display: block; }
+
+.site-footer { border-top: 1px solid var(--couleur-bordure); background: var(--couleur-fond); padding: 1.5rem 0; font-size: 0.82rem; color: var(--couleur-texte-quaternaire); }
+.site-footer .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.site-footer .symbole-pied { color: var(--couleur-accent-or); margin-right: 0.4rem; }
+
+@media (max-width: 640px) {
+  .container { padding: 0 1.2rem; }
+  .site-title { font-size: 1.9rem; }
+  .cartes { grid-template-columns: 1fr; }
+  .niveau-entete .symbole { font-size: 2.5rem; }
+}
