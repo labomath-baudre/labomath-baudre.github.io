@@ -1,21 +1,24 @@
 /* ============================================================
    LaboMath — Feuille de style
-   Couleur d'accent : bleu encre
-   Polices : Crimson Pro (titres) et IBM Plex Sans (corps)
+   Style carnet : palette crème, accent bleu encre, symboles mathématiques
    ============================================================ */
 
 /* Variables de couleur et de typographie */
 :root {
-  --couleur-accent: #1e4d7b;
-  --couleur-accent-fonce: #133655;
-  --couleur-accent-clair: #e6eef5;
-  --couleur-texte: #1a1a1a;
-  --couleur-texte-secondaire: #555;
-  --couleur-texte-tertiaire: #888;
-  --couleur-bordure: #e2e2e2;
-  --couleur-bordure-claire: #f0f0f0;
-  --couleur-fond: #fbfaf7;
+  --couleur-fond: #f5efe4;
   --couleur-fond-blanc: #ffffff;
+  --couleur-accent: #1e3a5f;
+  --couleur-accent-clair: #d9e3ed;
+  --couleur-accent-or: #c9b896;
+  --couleur-actu-fond: #ede4d0;
+  --couleur-actu-titre: #8b6914;
+  --couleur-actu-texte: #4a3d1a;
+  --couleur-texte: #1a1a1a;
+  --couleur-texte-secondaire: #4a443c;
+  --couleur-texte-tertiaire: #6b6359;
+  --couleur-texte-quaternaire: #8b8378;
+  --couleur-bordure: #d9cfb8;
+  --couleur-bordure-claire: #e8dfd0;
 
   --police-titre: 'Crimson Pro', Georgia, serif;
   --police-corps: 'IBM Plex Sans', -apple-system, sans-serif;
@@ -35,23 +38,23 @@ html {
 body {
   font-family: var(--police-corps);
   font-size: 16px;
-  line-height: 1.65;
+  line-height: 1.7;
   color: var(--couleur-texte);
   background: var(--couleur-fond);
   -webkit-font-smoothing: antialiased;
 }
 
 .container {
-  max-width: 880px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1.75rem;
 }
 
 /* ============================================================
    En-tête
    ============================================================ */
 .site-header {
-  background: var(--couleur-fond-blanc);
+  background: var(--couleur-fond);
   border-bottom: 1px solid var(--couleur-bordure);
   padding: 2rem 0 0;
 }
@@ -59,34 +62,35 @@ body {
 .site-title {
   display: inline-block;
   font-family: var(--police-titre);
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: var(--couleur-accent-fonce);
+  font-size: 2.4rem;
+  font-weight: 500;
+  color: var(--couleur-accent);
   text-decoration: none;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .site-subtitle {
   font-size: 0.95rem;
-  color: var(--couleur-texte-secondaire);
-  margin-top: 0.15rem;
+  color: var(--couleur-texte-tertiaire);
+  margin-top: 0.4rem;
   font-style: italic;
 }
 
 .site-nav {
   display: flex;
-  gap: 1.5rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
+  gap: 1.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
   border-top: 1px solid var(--couleur-bordure-claire);
-  padding-bottom: 1rem;
+  padding-bottom: 1.1rem;
   flex-wrap: wrap;
 }
 
 .site-nav a {
-  color: var(--couleur-texte-secondaire);
+  color: var(--couleur-texte-tertiaire);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 400;
   transition: color 0.15s;
 }
@@ -105,21 +109,29 @@ body {
 
 .site-content h1 {
   font-family: var(--police-titre);
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--couleur-accent-fonce);
+  font-size: 2.4rem;
+  font-weight: 500;
+  color: var(--couleur-texte);
   margin-bottom: 1.25rem;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .site-content h2 {
   font-family: var(--police-titre);
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 500;
   color: var(--couleur-texte);
-  margin: 2.25rem 0 1rem;
+  margin: 2.5rem 0 0.5rem;
   line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.site-content .sous-titre {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--couleur-texte-tertiaire);
 }
 
 .site-content h3 {
@@ -132,12 +144,13 @@ body {
 
 .site-content p {
   margin-bottom: 1.1rem;
+  color: var(--couleur-texte-secondaire);
 }
 
 .site-content a {
   color: var(--couleur-accent);
   text-decoration: underline;
-  text-decoration-color: rgba(30, 77, 123, 0.3);
+  text-decoration-color: rgba(30, 58, 95, 0.3);
   text-underline-offset: 2px;
   transition: text-decoration-color 0.15s;
 }
@@ -153,79 +166,119 @@ body {
 
 .site-content li {
   margin-bottom: 0.4rem;
-}
-
-.site-content em {
   color: var(--couleur-texte-secondaire);
 }
 
+.site-content em {
+  color: var(--couleur-texte-tertiaire);
+}
+
 /* ============================================================
-   Bloc actualité (accueil)
+   Séparateurs décoratifs (symboles mathématiques)
+   ============================================================ */
+.separateur {
+  text-align: center;
+  margin: 2.5rem 0;
+  color: var(--couleur-accent-or);
+  font-family: var(--police-titre);
+  font-size: 1.4rem;
+}
+
+/* ============================================================
+   Bloc actualité
    ============================================================ */
 .actualite {
-  background: var(--couleur-accent-clair);
-  border-left: 3px solid var(--couleur-accent);
-  padding: 0.85rem 1.1rem;
-  margin: 1.75rem 0;
+  background: var(--couleur-actu-fond);
+  padding: 1rem 1.25rem;
+  margin: 2rem 0;
+  border-radius: 2px;
 }
 
 .actualite-titre {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  color: var(--couleur-accent-fonce);
+  color: var(--couleur-actu-titre);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.3rem;
 }
 
 .actualite p {
   margin-bottom: 0;
-  color: var(--couleur-accent-fonce);
+  color: var(--couleur-actu-texte);
   font-size: 0.95rem;
 }
 
 /* ============================================================
-   Cartes d'accès aux sections (accueil)
+   Cartes d'accès aux sections
    ============================================================ */
 .cartes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
-  margin: 1.5rem 0 2rem;
+  margin: 1.25rem 0 2rem;
 }
 
 .carte {
   display: block;
   background: var(--couleur-fond-blanc);
-  border: 1px solid var(--couleur-bordure);
-  border-radius: 4px;
-  padding: 1.1rem 1.3rem;
+  border: 0.5px solid var(--couleur-bordure);
+  border-radius: 3px;
+  padding: 1.1rem 1.3rem 1.2rem;
   text-decoration: none !important;
   color: inherit;
-  transition: border-color 0.15s, transform 0.15s;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
 .carte:hover {
   border-color: var(--couleur-accent);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.08);
+}
+
+.carte .symbole {
+  font-family: var(--police-titre);
+  font-size: 1.8rem;
+  color: var(--couleur-accent-or);
+  display: block;
+  margin: 0 0 0.4rem;
+  line-height: 1;
+  font-weight: 500;
 }
 
 .carte h3 {
   font-family: var(--police-titre);
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 500;
-  color: var(--couleur-accent-fonce);
+  color: var(--couleur-accent);
   margin: 0 0 0.3rem;
 }
 
 .carte p {
-  color: var(--couleur-texte-secondaire);
-  font-size: 0.9rem;
+  color: var(--couleur-texte-tertiaire);
+  font-size: 0.88rem;
   margin: 0;
+  line-height: 1.5;
 }
 
 /* ============================================================
-   Listes de documents (pages de section)
+   En-tête de page de niveau (avec symbole)
+   ============================================================ */
+.niveau-entete {
+  margin-bottom: 0.5rem;
+}
+
+.niveau-entete .symbole {
+  font-family: var(--police-titre);
+  font-size: 3rem;
+  color: var(--couleur-accent-or);
+  line-height: 1;
+  display: block;
+  font-weight: 500;
+}
+
+/* ============================================================
+   Listes de documents
    ============================================================ */
 .documents {
   list-style: none;
@@ -234,7 +287,7 @@ body {
 }
 
 .documents li {
-  padding: 0.7rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--couleur-bordure-claire);
 }
 
@@ -249,9 +302,9 @@ body {
 
 .documents .description {
   display: block;
-  color: var(--couleur-texte-secondaire);
+  color: var(--couleur-texte-tertiaire);
   font-size: 0.9rem;
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
 }
 
 /* ============================================================
@@ -259,10 +312,10 @@ body {
    ============================================================ */
 .site-footer {
   border-top: 1px solid var(--couleur-bordure);
-  background: var(--couleur-fond-blanc);
+  background: var(--couleur-fond);
   padding: 1.5rem 0;
-  font-size: 0.85rem;
-  color: var(--couleur-texte-tertiaire);
+  font-size: 0.82rem;
+  color: var(--couleur-texte-quaternaire);
 }
 
 .site-footer .container {
@@ -276,6 +329,11 @@ body {
   margin: 0;
 }
 
+.site-footer .symbole-pied {
+  color: var(--couleur-accent-or);
+  margin-right: 0.4rem;
+}
+
 /* ============================================================
    Adaptation mobile
    ============================================================ */
@@ -285,22 +343,26 @@ body {
   }
 
   .site-title {
-    font-size: 1.8rem;
+    font-size: 1.9rem;
   }
 
   .site-nav {
-    gap: 0.8rem 1.2rem;
+    gap: 0.8rem 1.4rem;
   }
 
   .site-content h1 {
-    font-size: 1.6rem;
+    font-size: 1.85rem;
   }
 
   .site-content h2 {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
   }
 
   .cartes {
     grid-template-columns: 1fr;
+  }
+
+  .niveau-entete .symbole {
+    font-size: 2.5rem;
   }
 }
