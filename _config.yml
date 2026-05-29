@@ -7,10 +7,6 @@ lang: fr
 date_format: "%-d %B %Y"
 
 markdown: kramdown
-kramdown:
-  input: GFM
-  parse_block_html: true
-  parse_span_html: true
 
 exclude:
   - README.md
