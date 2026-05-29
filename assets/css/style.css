@@ -1,0 +1,306 @@
+/* ============================================================
+   LaboMath — Feuille de style
+   Couleur d'accent : bleu encre
+   Polices : Crimson Pro (titres) et IBM Plex Sans (corps)
+   ============================================================ */
+
+/* Variables de couleur et de typographie */
+:root {
+  --couleur-accent: #1e4d7b;
+  --couleur-accent-fonce: #133655;
+  --couleur-accent-clair: #e6eef5;
+  --couleur-texte: #1a1a1a;
+  --couleur-texte-secondaire: #555;
+  --couleur-texte-tertiaire: #888;
+  --couleur-bordure: #e2e2e2;
+  --couleur-bordure-claire: #f0f0f0;
+  --couleur-fond: #fbfaf7;
+  --couleur-fond-blanc: #ffffff;
+
+  --police-titre: 'Crimson Pro', Georgia, serif;
+  --police-corps: 'IBM Plex Sans', -apple-system, sans-serif;
+}
+
+/* Reset minimal */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--police-corps);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--couleur-texte);
+  background: var(--couleur-fond);
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ============================================================
+   En-tête
+   ============================================================ */
+.site-header {
+  background: var(--couleur-fond-blanc);
+  border-bottom: 1px solid var(--couleur-bordure);
+  padding: 2rem 0 0;
+}
+
+.site-title {
+  display: inline-block;
+  font-family: var(--police-titre);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--couleur-accent-fonce);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.site-subtitle {
+  font-size: 0.95rem;
+  color: var(--couleur-texte-secondaire);
+  margin-top: 0.15rem;
+  font-style: italic;
+}
+
+.site-nav {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--couleur-bordure-claire);
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  color: var(--couleur-texte-secondaire);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 400;
+  transition: color 0.15s;
+}
+
+.site-nav a:hover {
+  color: var(--couleur-accent);
+}
+
+/* ============================================================
+   Contenu principal
+   ============================================================ */
+.site-content {
+  padding: 2.5rem 0 3.5rem;
+  min-height: 60vh;
+}
+
+.site-content h1 {
+  font-family: var(--police-titre);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--couleur-accent-fonce);
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.site-content h2 {
+  font-family: var(--police-titre);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--couleur-texte);
+  margin: 2.25rem 0 1rem;
+  line-height: 1.3;
+}
+
+.site-content h3 {
+  font-family: var(--police-corps);
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin: 1.5rem 0 0.5rem;
+  color: var(--couleur-texte);
+}
+
+.site-content p {
+  margin-bottom: 1.1rem;
+}
+
+.site-content a {
+  color: var(--couleur-accent);
+  text-decoration: underline;
+  text-decoration-color: rgba(30, 77, 123, 0.3);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.15s;
+}
+
+.site-content a:hover {
+  text-decoration-color: var(--couleur-accent);
+}
+
+.site-content ul,
+.site-content ol {
+  margin: 0 0 1.1rem 1.5rem;
+}
+
+.site-content li {
+  margin-bottom: 0.4rem;
+}
+
+.site-content em {
+  color: var(--couleur-texte-secondaire);
+}
+
+/* ============================================================
+   Bloc actualité (accueil)
+   ============================================================ */
+.actualite {
+  background: var(--couleur-accent-clair);
+  border-left: 3px solid var(--couleur-accent);
+  padding: 0.85rem 1.1rem;
+  margin: 1.75rem 0;
+}
+
+.actualite-titre {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--couleur-accent-fonce);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+.actualite p {
+  margin-bottom: 0;
+  color: var(--couleur-accent-fonce);
+  font-size: 0.95rem;
+}
+
+/* ============================================================
+   Cartes d'accès aux sections (accueil)
+   ============================================================ */
+.cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.carte {
+  display: block;
+  background: var(--couleur-fond-blanc);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: 4px;
+  padding: 1.1rem 1.3rem;
+  text-decoration: none !important;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.carte:hover {
+  border-color: var(--couleur-accent);
+  transform: translateY(-2px);
+}
+
+.carte h3 {
+  font-family: var(--police-titre);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--couleur-accent-fonce);
+  margin: 0 0 0.3rem;
+}
+
+.carte p {
+  color: var(--couleur-texte-secondaire);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ============================================================
+   Listes de documents (pages de section)
+   ============================================================ */
+.documents {
+  list-style: none;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+.documents li {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--couleur-bordure-claire);
+}
+
+.documents li:last-child {
+  border-bottom: none;
+}
+
+.documents a {
+  display: inline-block;
+  font-weight: 500;
+}
+
+.documents .description {
+  display: block;
+  color: var(--couleur-texte-secondaire);
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+}
+
+/* ============================================================
+   Pied de page
+   ============================================================ */
+.site-footer {
+  border-top: 1px solid var(--couleur-bordure);
+  background: var(--couleur-fond-blanc);
+  padding: 1.5rem 0;
+  font-size: 0.85rem;
+  color: var(--couleur-texte-tertiaire);
+}
+
+.site-footer .container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* ============================================================
+   Adaptation mobile
+   ============================================================ */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 1.2rem;
+  }
+
+  .site-title {
+    font-size: 1.8rem;
+  }
+
+  .site-nav {
+    gap: 0.8rem 1.2rem;
+  }
+
+  .site-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .site-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .cartes {
+    grid-template-columns: 1fr;
+  }
+}
