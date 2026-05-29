@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Première
+title: Premiere
 ---
 
 # Première — Automatismes
