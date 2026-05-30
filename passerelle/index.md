@@ -14,7 +14,7 @@ title: Passerelle Bac → BTS
   <div>
     <p>L'entrée en BTS marque une étape : quelle que soit la voie d'origine, chaque étudiant gagne à reprendre appui sur les fondamentaux mathématiques et à se familiariser avec les outils spécifiques à sa spécialité dès les premières semaines.</p>
     <p>L'équipe de mathématiques du Lycée de Baudre propose un <strong>parcours de consolidation</strong> déployé sur les six premières semaines de l'année.</p>
-    <p>Chaque cahier articule deux dimensions complémentaires : un <strong>tronc commun de rappels</strong> sur les bases mathématiques mobilisées dans tous les BTS industriels, et des <strong>outils adaptés à chaque spécialité</strong>, en lien direct avec les enseignements professionnels du premier semestre.</p>
+    <p>Chaque cahier articule deux dimensions complémentaires : un <strong>tronc commun de rappels</strong> sur les bases mathématiques mobilisées dans tous les BTS industriels, et des <strong>outils adaptés à chaque spécialité</strong>, en lien direct avec les enseignements professionnels de la formation.</p>
     <p>Les cahiers ont été rédigés en concertation avec les enseignants des disciplines professionnelles.</p>
   </div>
 
