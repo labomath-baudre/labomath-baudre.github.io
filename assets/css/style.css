@@ -100,8 +100,8 @@ body { font-family: var(--police-corps); font-size: 16px; line-height: 1.7; colo
 }
 
 .cahier-complet {
-  background: var(background: #d9e3ed;);
-  border: 1px solid var(border: 1px solid #a8c2da;);
+  background: var(--couleur-fond-blanc);
+  border: 1px solid var(--couleur-bordure);
   border-radius: 3px;
   padding: 14px 16px;
   display: flex;
@@ -118,13 +118,7 @@ body { font-family: var(--police-corps); font-size: 16px; line-height: 1.7; colo
   transform: translateY(-1px);
 }
 
-.cahier-complet .symbole {
-  font-family: var(--police-titre);
-  font-size: 1.4rem;
-  color: var(--couleur-accent);
-  line-height: 1;
-  flex-shrink: 0;
-}
+color: var(--couleur-accent-or);
 
 .cahier-complet .titre {
   font-family: var(--police-titre);
