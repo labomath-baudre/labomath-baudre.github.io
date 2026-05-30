@@ -30,7 +30,7 @@ body { font-family: var(--police-corps); font-size: 16px; line-height: 1.7; colo
 @media (max-width: 640px) { .site-logo img { max-height: 75px; } }
 .site-nav { display: flex; gap: 1.75rem; margin-top: 1.5rem; padding: 1.1rem 0; border-top: 1px solid var(--couleur-bordure-claire); flex-wrap: wrap; }
 .site-nav a { color: var(--couleur-texte-tertiaire); text-decoration: none; font-size: 0.92rem; }
-.site-nav a:hover { color: var(--couleur-accent); }
+.site-nav a:hover { color: var(--couleur-accent); }}
 
 .site-content { padding: 2.5rem 0 3.5rem; min-height: 60vh; }
 .site-content h1 { font-family: var(--police-titre); font-size: 2.4rem; font-weight: 500; color: var(--couleur-texte); margin-bottom: 1.25rem; line-height: 1.15; }
@@ -306,4 +306,4 @@ color: var(--couleur-accent-or);
     gap: 1rem;
   }
 }
-}
+
