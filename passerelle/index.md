@@ -9,22 +9,7 @@ title: Passerelle Bac → BTS
 
 # Passerelle Bac → BTS
 
-## Du baccalauréat aux études supérieures
-
-L'entrée en BTS marque une étape : les mathématiques y sont mobilisées comme un outil au service des enseignements professionnels, avec leurs propres exigences et leurs propres rythmes. Quelle que soit la voie d'origine — générale, technologique ou professionnelle —, chaque étudiant gagne à reprendre appui sur les fondamentaux et à se familiariser avec les outils spécifiques à sa spécialité dès les premières semaines.
-
-Pour accompagner cette transition, l'équipe de mathématiques du Lycée de Baudre propose un **parcours de consolidation** déployé sur les six premières semaines de l'année.
-
-## Comment le parcours est construit
-
-Chaque cahier articule deux dimensions complémentaires :
-
-- un **tronc commun de rappels** sur les bases mathématiques mobilisées dans tous les BTS industriels (calcul, fonctions, repérage, trigonométrie, etc.) ;
-- des **outils adaptés à chaque spécialité**, en lien direct avec les enseignements professionnels du premier semestre.
-
-Les cahiers ont été rédigés en concertation avec les enseignants des disciplines professionnelles, pour que les notions consolidées soient effectivement celles qui seront mobilisées en cours.
-
-<div class="separateur">∂</div>
+L'entrée en BTS marque une étape : quelle que soit la voie d'origine, chaque étudiant gagne à reprendre appui sur les fondamentaux mathématiques et à se familiariser avec les outils spécifiques à sa spécialité dès les premières semaines. L'équipe de mathématiques du Lycée de Baudre propose un **parcours de consolidation** déployé sur les six premières semaines de l'année.
 
 ## Accéder au parcours par spécialité
 
@@ -52,6 +37,17 @@ Les cahiers ont été rédigés en concertation avec les enseignants des discipl
     <p>Cybersécurité, Informatique et Réseaux, Électronique.</p>
   </a>
 </div>
+
+<div class="separateur">∂</div>
+
+## Comment le parcours est construit
+
+Chaque cahier articule deux dimensions complémentaires :
+
+- un **tronc commun de rappels** sur les bases mathématiques mobilisées dans tous les BTS industriels (calcul, fonctions, repérage, trigonométrie, etc.) ;
+- des **outils adaptés à chaque spécialité**, en lien direct avec les enseignements professionnels du premier semestre.
+
+Les cahiers ont été rédigés en concertation avec les enseignants des disciplines professionnelles, pour que les notions consolidées soient effectivement celles qui seront mobilisées en cours.
 
 <div class="separateur">Σ</div>
 
