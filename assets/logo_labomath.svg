@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 230" width="540" height="230">
+  <!-- Logo LaboMath - Version définitive -->
+  
+  <!-- Mât vertical à gauche -->
+  <path d="M 30 70 L 60 70 L 60 150 L 30 150 Z" fill="#1e3a5f"/>
+  
+  <!-- Arc englobant -->
+  <path d="M 40 85 Q 250 35, 480 85" 
+        stroke="#1e3a5f" stroke-width="5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Texte LaboMath -->
+  <text x="85" y="150" 
+        font-family="Georgia, 'Times New Roman', serif" 
+        font-size="60" 
+        font-weight="500"
+        fill="#1e3a5f">LaboMath</text>
+  
+  <!-- Sous-titre aligné à droite de l'arc -->
+  <text x="482" y="190" 
+        text-anchor="end"
+        font-family="Georgia, 'Times New Roman', serif" 
+        font-size="20"
+        font-style="italic"
+        fill="#6b6359">Lycée de Baudre · Agen</text>
+</svg>
