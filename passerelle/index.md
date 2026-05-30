@@ -13,7 +13,9 @@ title: Passerelle Bac → BTS
 
   <div>
     <p>L'entrée en BTS marque une étape : quelle que soit la voie d'origine, chaque étudiant gagne à reprendre appui sur les fondamentaux mathématiques et à se familiariser avec les outils spécifiques à sa spécialité dès les premières semaines.</p>
-    <p>L'équipe de mathématiques du Lycée de Baudre propose un <strong>parcours de consolidation</strong> déployé sur les six premières semaines de l'année, articulant un tronc commun de rappels et des outils adaptés à chaque spécialité, en concertation avec les enseignants des disciplines professionnelles.</p>
+    <p>L'équipe de mathématiques du Lycée de Baudre propose un <strong>parcours de consolidation</strong> déployé sur les six premières semaines de l'année.</p>
+    <p>Chaque cahier articule deux dimensions complémentaires : un <strong>tronc commun de rappels</strong> sur les bases mathématiques mobilisées dans tous les BTS industriels, et des <strong>outils adaptés à chaque spécialité</strong>, en lien direct avec les enseignements professionnels du premier semestre.</p>
+    <p>Les cahiers ont été rédigés en concertation avec les enseignants des disciplines professionnelles.</p>
   </div>
 
   <div>
@@ -30,38 +32,27 @@ title: Passerelle Bac → BTS
         <span class="symbole">⚒</span>
         <div>
           <span class="titre">BTS CPRP</span>
-          <span class="description">Processus de Réalisation</span>
+          <span class="description">Conception des Processus de Réalisation de Produits</span>
         </div>
       </a>
       <a href="{{ '/passerelle/electro/' | relative_url }}" class="carte-compacte">
         <span class="symbole">⚡</span>
         <div>
           <span class="titre">BTS Électrotechnique</span>
-          <span class="description">Génie électrique et automatismes</span>
+          <span class="description">Génie électrique et automatismes industriels</span>
         </div>
       </a>
       <a href="{{ '/passerelle/ciel/' | relative_url }}" class="carte-compacte">
         <span class="symbole">⌬</span>
         <div>
           <span class="titre">BTS CIEL</span>
-          <span class="description">Cybersécurité, Informatique, Réseaux</span>
+          <span class="description">Cybersécurité, Informatique et Réseaux, Électronique</span>
         </div>
       </a>
     </div>
   </div>
 
 </div>
-
-<div class="separateur">∂</div>
-
-## Comment le parcours est construit
-
-Chaque cahier articule deux dimensions complémentaires :
-
-- un **tronc commun de rappels** sur les bases mathématiques mobilisées dans tous les BTS industriels (calcul, fonctions, repérage, trigonométrie, etc.) ;
-- des **outils adaptés à chaque spécialité**, en lien direct avec les enseignements professionnels du premier semestre.
-
-Les cahiers ont été rédigés en concertation avec les enseignants des disciplines professionnelles, pour que les notions consolidées soient effectivement celles qui seront mobilisées en cours.
 
 <div class="separateur">Σ</div>
 
