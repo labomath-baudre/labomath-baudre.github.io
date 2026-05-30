@@ -13,4 +13,9 @@ Cette page rassemble les ressources de consolidation destinées aux bacheliers p
 
 ## Documents disponibles
 
-*Les documents seront ajoutés au fur et à mesure.*
+<ul class="documents">
+  <li>
+    <a href="docs/CIEL_etudiant.pdf">Cahier de consolidation — Fonctions</a>
+    <span class="description">Révisions des fonctions usuelles, dérivation et étude de variations, en vue de l'entrée en BTS.</span>
+  </li>
+</ul>
