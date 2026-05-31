@@ -37,6 +37,25 @@
       padding: 2rem 1rem;
     }
     .container { max-width: 820px; margin: 0 auto; }
+    /* En-tête de navigation */
+    .nav-top {
+      max-width: 820px;
+      margin: 0 auto 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--couleur-bordure);
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-top a {
+      color: var(--couleur-accent);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .nav-top a:hover { color: var(--couleur-accent-or); }
+    .nav-top .separateur-nav { color: var(--couleur-texte-tertiaire); }
     h1 { font-family: var(--police-titre); font-size: 2rem; font-weight: 500; color: var(--couleur-accent); margin-bottom: 0.5rem; }
     .intro { color: var(--couleur-texte-secondaire); margin-bottom: 1.5rem; font-size: 0.95rem; }
     .formulaire { background: var(--couleur-fond-blanc); border: 1px solid var(--couleur-bordure); border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem; }
@@ -99,6 +118,13 @@
   </style>
 </head>
 <body>
+<nav class="nav-top">
+  <a href="../">← Accueil LaboMath</a>
+  <span class="separateur-nav">·</span>
+  <a href="../seconde/">Seconde</a>
+  <span class="separateur-nav">·</span>
+  <a href="../projets/">Projets</a>
+</nav>
 <div class="container">
   <h1>Générateur d'automatismes</h1>
   <p class="intro">Composez votre fiche en cochant les thèmes au niveau de précision souhaité. Un thème principal coché tirera des questions équilibrées dans toutes ses sous-catégories. Pour cibler plus finement, déroulez l'arborescence.</p>
@@ -1816,7 +1842,12 @@ async function capturerHTMLversCanvas(html) {
     delimiters: [{ left: '$', right: '$', display: false }, { left: '$$', right: '$$', display: true }],
     throwOnError: false
   });
-  await new Promise(r => setTimeout(r, 250));
+  // Attendre que toutes les polices (notamment KaTeX_Math, KaTeX_Main, etc.) soient totalement chargées
+  if (document.fonts && document.fonts.ready) {
+    await document.fonts.ready;
+  }
+  // Délai supplémentaire pour s'assurer que KaTeX a fini de rendre toutes ses formules
+  await new Promise(r => setTimeout(r, 600));
   const apercu = document.getElementById('apercu-pdf');
   apercu.style.display = 'block';
   apercu.style.position = 'absolute';
@@ -1831,7 +1862,13 @@ async function capturerHTMLversCanvas(html) {
     const r = b.getBoundingClientRect();
     limites.push(r.bottom - zoneTop);
   }
-  const canvas = await html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' });
+  // useCORS + foreignObjectRendering pour mieux capturer les polices web
+  const canvas = await html2canvas(zone, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    useCORS: true,
+    logging: false
+  });
   apercu.style.display = 'none';
   // Convertir les limites HTML en limites de pixels canvas (scale 2)
   const limitesCanvas = limites.map(l => l * 2);
@@ -1979,6 +2016,26 @@ document.getElementById('bouton-generer').addEventListener('click', genererPDF);
 
 construireArbre();
 majTotal();
+
+// Précharger les polices KaTeX en rendant une formule cachée dès le démarrage
+// Cela force le navigateur à télécharger les polices KaTeX_Math, KaTeX_Main, etc.
+window.addEventListener('load', () => {
+  const prechauffe = document.createElement('div');
+  prechauffe.style.position = 'absolute';
+  prechauffe.style.left = '-9999px';
+  prechauffe.style.top = '-9999px';
+  prechauffe.style.visibility = 'hidden';
+  prechauffe.textContent = '$x^2 + 2x \\times 3 = \\dfrac{a}{b} - \\sqrt{c}$';
+  document.body.appendChild(prechauffe);
+  setTimeout(() => {
+    if (window.renderMathInElement) {
+      renderMathInElement(prechauffe, {
+        delimiters: [{ left: '$', right: '$', display: false }],
+        throwOnError: false
+      });
+    }
+  }, 100);
+});
 </script>
 </body>
 </html>
