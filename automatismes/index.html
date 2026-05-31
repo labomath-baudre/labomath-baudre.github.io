@@ -1901,8 +1901,6 @@ function ajouterCanvasAuPDF(pdf, capture, debut) {
   let estPremierePagePDF = true;
   while (debutPagePx < canvas.height) {
     // Hauteur utile disponible sur cette page (en pixels canvas)
-    // - 1re page : utilise toute la hauteur (l'en-tête HTML fait déjà office de marge haute)
-    // - pages suivantes : on réserve une marge haute
     const margeHautPxThisPage = estPremierePagePDF ? 0 : (margeHaut_mm * pxParMm);
     const hauteurUtile_px = (pageH_mm * pxParMm) - margeHautPxThisPage - margeBas_px;
 
@@ -1911,16 +1909,26 @@ function ajouterCanvasAuPDF(pdf, capture, debut) {
     let finPage;
 
     if (finTheorique >= canvas.height) {
+      // Dernière page : on prend tout le reste
       finPage = canvas.height;
     } else {
-      const hauteurMinPage = hauteurUtile_px * 0.3;
-      let meilleureLimite = finTheorique;
+      // Chercher la dernière limite (fin d'exercice complet) qui se trouve
+      // STRICTEMENT après debutPagePx (sinon page vide) et au plus à finTheorique
+      let meilleureLimite = -1;
       for (const l of limitesCanvas) {
-        if (l > debutPagePx + hauteurMinPage && l <= finTheorique) {
+        if (l > debutPagePx && l <= finTheorique && l > meilleureLimite) {
           meilleureLimite = l;
         }
       }
-      finPage = meilleureLimite;
+
+      if (meilleureLimite < 0) {
+        // Aucune fin d'exercice ne tient dans la page : c'est qu'un exercice est plus grand
+        // qu'une page A4 (très rare). On coupe à la limite théorique (en dernier recours).
+        finPage = finTheorique;
+      } else {
+        // On termine la page à la fin du dernier exercice complet
+        finPage = meilleureLimite;
+      }
     }
 
     // Créer un canvas temporaire avec la portion utile
