@@ -32,7 +32,7 @@ body {
 .container { max-width: 1100px; margin: 0 auto; padding: 0 1.75rem; }
 
 /* ============================================================
-   EN-TÊTE : logo à gauche, menu à droite (sur la même ligne)
+   EN-TÊTE : logo à gauche, menu à droite
    ============================================================ */
 .site-header {
   background: var(--couleur-fond);
@@ -49,17 +49,8 @@ body {
   padding-bottom: 1.25rem;
 }
 
-.site-logo {
-  flex-shrink: 0;
-  display: inline-block;
-}
-
-.site-logo img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  max-height: 140px;
-}
+.site-logo { flex-shrink: 0; display: inline-block; }
+.site-logo img { display: block; max-width: 100%; height: auto; max-height: 140px; }
 
 .site-nav {
   display: flex;
@@ -74,16 +65,26 @@ body {
   font-size: 1.05rem;
   font-weight: 500;
 }
-.site-nav a:hover {
-  color: var(--couleur-accent);
+
+.site-nav a:hover { color: var(--couleur-accent-or); }
+
+/* Lien Passerelle sur deux lignes */
+.site-nav .nav-deux-lignes {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
 }
 
-/* Sur mobile : disposition verticale */
+.site-nav .nav-deux-lignes .ligne-2 {
+  font-size: 0.82rem;
+  color: var(--couleur-texte-tertiaire);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
 @media (max-width: 768px) {
-  .site-header .container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  .site-header .container { flex-direction: column; align-items: flex-start; }
   .site-nav {
     margin-top: 1rem;
     padding-top: 1rem;
@@ -91,7 +92,7 @@ body {
     gap: 1rem;
     width: 100%;
   }
-  .site-logo img { max-height: 75px; }
+  .site-logo img { max-height: 90px; }
 }
 
 /* ============================================================
@@ -132,181 +133,42 @@ body {
 }
 
 /* ============================================================
-   Pages spécialité (BTS) : deux colonnes texte + accès PDF
+   Pages spécialité (BTS)
    ============================================================ */
-.specialite-intro {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-  margin: 1.5rem 0 2rem;
-}
-.specialite-intro h2 {
-  font-family: var(--police-titre);
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: var(--couleur-texte);
-  margin: 0 0 0.6rem;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-}
-.specialite-intro h2:not(:first-child) {
-  margin-top: 1.5rem;
-}
-.cahier-titre {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--couleur-texte-tertiaire);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0 0 0.75rem;
-}
-.cahier-complet {
-  background: var(--couleur-fond-blanc);
-  border: 1px solid var(--couleur-bordure);
-  border-radius: 3px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  text-decoration: none !important;
-  color: inherit;
-  margin-bottom: 1.5rem;
-  transition: border-color 0.15s, transform 0.15s;
-}
-.cahier-complet:hover {
-  border-color: var(--couleur-accent);
-  transform: translateY(-1px);
-}
-.cahier-complet .titre {
-  font-family: var(--police-titre);
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--couleur-accent);
-  display: block;
-  line-height: 1.2;
-}
-.cahier-complet .description {
-  font-size: 0.78rem;
-  color: var(--couleur-texte-tertiaire);
-  display: block;
-  margin-top: 4px;
-  line-height: 1.35;
-}
+.specialite-intro { display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; align-items: start; margin: 1.5rem 0 2rem; }
+.specialite-intro h2 { font-family: var(--police-titre); font-size: 1.4rem; font-weight: 500; color: var(--couleur-texte); margin: 0 0 0.6rem; line-height: 1.3; letter-spacing: -0.01em; }
+.specialite-intro h2:not(:first-child) { margin-top: 1.5rem; }
+.cahier-titre { font-size: 0.75rem; font-weight: 500; color: var(--couleur-texte-tertiaire); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.75rem; }
+.cahier-complet { background: var(--couleur-fond-blanc); border: 1px solid var(--couleur-bordure); border-radius: 3px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; text-decoration: none !important; color: inherit; margin-bottom: 1.5rem; transition: border-color 0.15s, transform 0.15s; }
+.cahier-complet:hover { border-color: var(--couleur-accent); transform: translateY(-1px); }
+.cahier-complet .titre { font-family: var(--police-titre); font-size: 1rem; font-weight: 500; color: var(--couleur-accent); display: block; line-height: 1.2; }
+.cahier-complet .description { font-size: 0.78rem; color: var(--couleur-texte-tertiaire); display: block; margin-top: 4px; line-height: 1.35; }
 .semaines { display: grid; gap: 4px; }
-.semaines a {
-  background: var(--couleur-fond-blanc);
-  border: 1px solid var(--couleur-bordure);
-  border-radius: 3px;
-  padding: 9px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none !important;
-  color: inherit;
-  transition: border-color 0.15s;
-}
+.semaines a { background: var(--couleur-fond-blanc); border: 1px solid var(--couleur-bordure); border-radius: 3px; padding: 9px 14px; display: flex; align-items: center; gap: 10px; text-decoration: none !important; color: inherit; transition: border-color 0.15s; }
 .semaines a:hover { border-color: var(--couleur-accent); }
-.semaines a .num {
-  font-family: var(--police-titre);
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--couleur-accent-or);
-  flex-shrink: 0;
-  min-width: 18px;
-}
-.semaines a .theme {
-  font-size: 0.88rem;
-  color: var(--couleur-accent);
-  line-height: 1.25;
-}
+.semaines a .num { font-family: var(--police-titre); font-size: 0.9rem; font-weight: 500; color: var(--couleur-accent-or); flex-shrink: 0; min-width: 18px; }
+.semaines a .theme { font-size: 0.88rem; color: var(--couleur-accent); line-height: 1.25; }
 .specialite-maths { margin-top: 0; }
-.specialite-maths h2 {
-  font-family: var(--police-titre);
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: var(--couleur-texte);
-  margin: 0 0 0.6rem;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-}
+.specialite-maths h2 { font-family: var(--police-titre); font-size: 1.4rem; font-weight: 500; color: var(--couleur-texte); margin: 0 0 0.6rem; line-height: 1.3; letter-spacing: -0.01em; }
 
 @media (max-width: 800px) {
   .specialite-intro { grid-template-columns: 1fr; gap: 1.5rem; }
 }
 
 /* ============================================================
-   Mise en page passerelle (deux colonnes intro + accès rapide)
+   Mise en page passerelle
    ============================================================ */
-.passerelle-intro {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-  margin: 1.5rem 0 0;
-}
+.passerelle-intro { display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; align-items: start; margin: 1.5rem 0 0; }
 .passerelle-intro + .separateur { margin: 0.75rem 0; }
-.acces-rapide-titre {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--couleur-texte-tertiaire);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0 0 0.75rem;
-}
+.acces-rapide-titre { font-size: 0.75rem; font-weight: 500; color: var(--couleur-texte-tertiaire); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.75rem; }
 .acces-rapide { display: grid; gap: 8px; }
-.acces-rapide .carte-compacte {
-  background: var(--couleur-fond-blanc);
-  border: 1px solid var(--couleur-bordure);
-  border-radius: 3px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none !important;
-  color: inherit;
-  transition: border-color 0.15s, transform 0.15s;
-}
-.acces-rapide .carte-compacte:hover {
-  border-color: var(--couleur-accent);
-  transform: translateY(-1px);
-}
-.acces-rapide .carte-compacte .symbole {
-  font-family: var(--police-titre);
-  font-size: 1.6rem;
-  color: var(--couleur-accent-or);
-  line-height: 1;
-  flex-shrink: 0;
-}
-.acces-rapide .carte-compacte .titre {
-  font-family: var(--police-titre);
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--couleur-accent);
-  display: block;
-  line-height: 1.15;
-}
-.acces-rapide .carte-compacte .description {
-  font-size: 0.78rem;
-  color: var(--couleur-texte-tertiaire);
-  display: block;
-  margin-top: 2px;
-  line-height: 1.25;
-}
+.acces-rapide .carte-compacte { background: var(--couleur-fond-blanc); border: 1px solid var(--couleur-bordure); border-radius: 3px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; text-decoration: none !important; color: inherit; transition: border-color 0.15s, transform 0.15s; }
+.acces-rapide .carte-compacte:hover { border-color: var(--couleur-accent); transform: translateY(-1px); }
+.acces-rapide .carte-compacte .symbole { font-family: var(--police-titre); font-size: 1.6rem; color: var(--couleur-accent-or); line-height: 1; flex-shrink: 0; }
+.acces-rapide .carte-compacte .titre { font-family: var(--police-titre); font-size: 1rem; font-weight: 500; color: var(--couleur-accent); display: block; line-height: 1.15; }
+.acces-rapide .carte-compacte .description { font-size: 0.78rem; color: var(--couleur-texte-tertiaire); display: block; margin-top: 2px; line-height: 1.25; }
 .passerelle-intro + .separateur + h2 { margin-top: 0; }
 
 @media (max-width: 800px) {
   .passerelle-intro { grid-template-columns: 1fr; gap: 1.5rem; }
-   /* Bouton "Passerelle Bac → BTS" sur deux lignes */
-.site-nav .nav-deux-lignes {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.15;
-}
-.site-nav .nav-deux-lignes .ligne-2 {
-  font-size: 0.82rem;
-  color: var(--couleur-texte-tertiaire);
-  font-weight: 400;
-}
 }
