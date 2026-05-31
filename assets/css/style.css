@@ -41,9 +41,9 @@ body {
 
 .site-header .container {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 3rem;
   flex-wrap: wrap;
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
@@ -56,7 +56,8 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 1.75rem;
-  align-items: center;
+  align-items: baseline;
+  padding-bottom: 1.5rem;
 }
 
 .site-nav a {
@@ -68,7 +69,6 @@ body {
 
 .site-nav a:hover { color: var(--couleur-accent-or); }
 
-/* Lien Passerelle sur deux lignes */
 .site-nav .nav-deux-lignes {
   display: inline-flex;
   flex-direction: column;
@@ -76,6 +76,12 @@ body {
   line-height: 1.15;
 }
 
+.site-nav .nav-deux-lignes .ligne-2 {
+  font-size: 0.82rem;
+  color: var(--couleur-texte-tertiaire);
+  font-weight: 400;
+  margin-top: 1px;
+}
 .site-nav .nav-deux-lignes .ligne-2 {
   font-size: 0.82rem;
   color: var(--couleur-texte-tertiaire);
