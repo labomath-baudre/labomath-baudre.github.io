@@ -35,7 +35,7 @@ title: Accueil
     <p>Cours et exercices pour la classe de Terminale générale et technologique.</p>
   </a>
   <a href="{{ '/passerelle/' | relative_url }}" class="carte">
-    <span class="symbole">√</span>
+    <span class="symbole racine-carree">√<span class="barre"></span></span>
     <h3>Passerelle</h3>
     <p>Consolidation pour les bacheliers professionnels accédant en BTS.</p>
   </a>
