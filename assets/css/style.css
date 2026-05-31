@@ -72,7 +72,7 @@ body {
 .site-nav .nav-deux-lignes {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   line-height: 1.15;
 }
 
