@@ -1886,8 +1886,8 @@ async function capturerHTMLversCanvas(html) {
 // (jamais couper au milieu d'un exercice)
 function ajouterCanvasAuPDF(pdf, capture, debut) {
   const pageW_mm = 210, pageH_mm = 297;
-  const margeBas_mm = 8;    // marge basse de sécurité
-  const margeHaut_mm = 12;  // marge haute pour les pages 2 et suivantes
+  const margeBas_mm = 10;   // marge basse de sécurité
+  const margeHaut_mm = 18;  // marge haute pour les pages 2 et suivantes (pour éviter de tronquer les fractions)
   const canvas = capture.canvas;
   const limitesCanvas = capture.limitesCanvas || [];
 
