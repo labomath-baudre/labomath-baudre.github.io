@@ -53,3 +53,8 @@ title: Accueil
 <p>Animé par l'équipe de mathématiques du Lycée de Baudre, le LaboMath rassemble en un lieu unique les ressources travaillées au sein de l'établissement. Tout est en libre accès, pour les élèves comme pour les collègues.</p>
 
 <p>Pour toute remarque ou suggestion, contactez l'équipe de mathématiques de l'établissement.</p>
+<a href="{{ '/projets/' | relative_url }}" class="carte">
+    <span class="symbole">∂</span>
+    <h3>Projets</h3>
+    <p>L'engagement pédagogique de l'équipe : automatismes, consolidation, mixité.</p>
+  </a>
