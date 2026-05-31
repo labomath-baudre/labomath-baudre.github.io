@@ -64,16 +64,16 @@ body {
 .site-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1.75rem;
   align-items: center;
 }
 
 .site-nav a {
-  color: var(--couleur-texte-tertiaire);
+  color: var(--couleur-accent);
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: 1.05rem;
+  font-weight: 500;
 }
-
 .site-nav a:hover {
   color: var(--couleur-accent);
 }
