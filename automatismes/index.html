@@ -965,6 +965,130 @@ function tracerBoiteMoustaches(min, q1, med, q3, max, opts) {
   return svg;
 }
 
+/**
+ * Trace un triangle rectangle annoté.
+ * opts = { angle, sommetA, sommetB, sommetC, opp, adj, hyp, angleNom }
+ * - sommetA est le sommet de l'angle droit (en bas à gauche par convention)
+ * - sommetB est le sommet où se trouve l'angle aigu marqué (en bas à droite)
+ * - sommetC est en haut
+ * - opp, adj, hyp sont les labels pour côté opposé à B (=AC), adjacent à B (=AB), hypoténuse (=BC)
+ * - angleNom : nom de l'angle (ex: 'α', '30°', 'B̂', etc.)
+ */
+function tracerTriangleRectangle(opts) {
+  const o = Object.assign({
+    width: 170, height: 130,
+    sommetA: 'A', sommetB: 'B', sommetC: 'C',
+    opp: null, adj: null, hyp: null,
+    angleNom: null,
+    // proportions du triangle (le côté adjacent fait 100 px, l'opposé est défini par l'angle)
+    angleDeg: 35,
+    cote: 100
+  }, opts || {});
+  
+  // Calculer les coordonnées des 3 sommets
+  // A en bas à gauche (angle droit), B en bas à droite (angle aigu), C en haut à gauche
+  const angleRad = o.angleDeg * Math.PI / 180;
+  const cote_adj = o.cote; // côté A-B
+  const cote_opp = cote_adj * Math.tan(angleRad); // côté A-C
+  
+  // Limiter la hauteur si trop grand
+  const maxOpp = 90;
+  let scale = 1;
+  if (cote_opp > maxOpp) scale = maxOpp / cote_opp;
+  const adjFinal = cote_adj * scale;
+  const oppFinal = cote_opp * scale;
+  
+  // Positionnement dans le SVG (centré horizontalement)
+  const margeG = 22, margeB = 25, margeH = 18;
+  const xA = margeG, yA = o.height - margeB;
+  const xB = xA + adjFinal, yB = yA;
+  const xC = xA, yC = yA - oppFinal;
+  
+  let svg = `<svg width="${o.width}" height="${o.height}" viewBox="0 0 ${o.width} ${o.height}" xmlns="http://www.w3.org/2000/svg" style="background: #f5efe4; border: 1px solid ${GRAPH_BORDURE}; border-radius: 4px; display: block;">`;
+  
+  // Triangle
+  svg += `<polygon points="${xA},${yA} ${xB},${yB} ${xC},${yC}" fill="white" stroke="${GRAPH_BLEU}" stroke-width="1.5"/>`;
+  
+  // Carré indiquant l'angle droit en A
+  const tailleCarre = 8;
+  svg += `<polyline points="${xA + tailleCarre},${yA} ${xA + tailleCarre},${yA - tailleCarre} ${xA},${yA - tailleCarre}" fill="none" stroke="${GRAPH_BLEU}" stroke-width="1"/>`;
+  
+  // Arc pour l'angle marqué en B (s'il y en a un)
+  if (o.angleNom) {
+    const rArc = 14;
+    // Angle entre la direction BA (gauche) et BC (vers le sommet en haut)
+    const xBAdir_x = -1, xBAdir_y = 0;
+    const xBCdir_x = (xC - xB), xBCdir_y = (yC - yB);
+    const normBC = Math.sqrt(xBCdir_x*xBCdir_x + xBCdir_y*xBCdir_y);
+    const cosA = (xBAdir_x * xBCdir_x + xBAdir_y * xBCdir_y) / normBC;
+    const angleAuB = Math.acos(cosA);
+    // Arc dessiné de la direction BA à BC autour de B
+    const startX = xB - rArc, startY = yB; // direction BA
+    const endX = xB + rArc * Math.cos(Math.PI - angleAuB), endY = yB - rArc * Math.sin(Math.PI - angleAuB);
+    svg += `<path d="M ${startX.toFixed(1)} ${startY.toFixed(1)} A ${rArc} ${rArc} 0 0 1 ${endX.toFixed(1)} ${endY.toFixed(1)}" fill="none" stroke="${GRAPH_BLEU}" stroke-width="1"/>`;
+    // Label de l'angle
+    const labelAngle = Math.PI - angleAuB/2;
+    const xLab = xB + (rArc + 10) * Math.cos(labelAngle);
+    const yLab = yB + (rArc + 10) * Math.sin(-angleAuB/2);
+    svg += `<text x="${xLab.toFixed(1)}" y="${yLab.toFixed(1)}" font-family="serif" font-style="italic" font-size="12" fill="${GRAPH_BLEU}" text-anchor="middle" dominant-baseline="middle">${o.angleNom}</text>`;
+  }
+  
+  // Labels des sommets
+  svg += `<text x="${xA - 8}" y="${yA + 12}" font-family="serif" font-size="13" font-weight="500" fill="${GRAPH_BLEU}" text-anchor="end">${o.sommetA}</text>`;
+  svg += `<text x="${xB + 4}" y="${yB + 12}" font-family="serif" font-size="13" font-weight="500" fill="${GRAPH_BLEU}">${o.sommetB}</text>`;
+  svg += `<text x="${xC - 8}" y="${yC - 2}" font-family="serif" font-size="13" font-weight="500" fill="${GRAPH_BLEU}" text-anchor="end">${o.sommetC}</text>`;
+  
+  // Labels des côtés
+  if (o.adj) {
+    // Côté A-B (en bas), label sous le segment
+    svg += `<text x="${(xA + xB) / 2}" y="${yA + 18}" font-family="serif" font-style="italic" font-size="11" fill="${GRAPH_BLEU}" text-anchor="middle">${o.adj}</text>`;
+  }
+  if (o.opp) {
+    // Côté A-C (à gauche), label à gauche du segment
+    svg += `<text x="${xA - 6}" y="${(yA + yC) / 2 + 4}" font-family="serif" font-style="italic" font-size="11" fill="${GRAPH_BLEU}" text-anchor="end">${o.opp}</text>`;
+  }
+  if (o.hyp) {
+    // Côté B-C (oblique), label au milieu décalé
+    const midX = (xB + xC) / 2, midY = (yB + yC) / 2;
+    // décalage perpendiculaire
+    const dx = xC - xB, dy = yC - yB;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const offsetX = -dy / len * 12, offsetY = dx / len * 12;
+    svg += `<text x="${(midX + offsetX).toFixed(1)}" y="${(midY + offsetY).toFixed(1)}" font-family="serif" font-style="italic" font-size="11" fill="${GRAPH_BLEU}" text-anchor="middle">${o.hyp}</text>`;
+  }
+  
+  svg += '</svg>';
+  return svg;
+}
+
+/**
+ * Trace un vecteur dans un repère (flèche de A vers B).
+ * À utiliser après tracerRepere : svg = creerRepere(...).svg + tracerVecteur(...) + creerRepere.fermer()
+ */
+function tracerVecteur(repere, xA, yA, xB, yB, opts) {
+  const o = Object.assign({ couleur: GRAPH_BLEU, label: null, labelOffset: 6 }, opts || {});
+  const x1 = repere.xPix(xA), y1 = repere.yPix(yA);
+  const x2 = repere.xPix(xB), y2 = repere.yPix(yB);
+  let svg = '';
+  // Définir un marqueur "arrow" unique avec un id basé sur la couleur
+  const arrowId = 'arrow_' + o.couleur.replace('#', '');
+  svg += `<defs><marker id="${arrowId}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${o.couleur}"/></marker></defs>`;
+  // Flèche
+  svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${o.couleur}" stroke-width="1.5" marker-end="url(#${arrowId})"/>`;
+  // Label (milieu du vecteur, décalé perpendiculairement)
+  if (o.label) {
+    const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    if (len > 0) {
+      const offsetX = -dy / len * o.labelOffset;
+      const offsetY = dx / len * o.labelOffset;
+      svg += `<text x="${(midX + offsetX).toFixed(1)}" y="${(midY + offsetY).toFixed(1)}" font-family="serif" font-style="italic" font-size="11" fill="${o.couleur}" text-anchor="middle" dominant-baseline="middle">${o.label}</text>`;
+    }
+  }
+  return svg;
+}
+
 const generateurs = {
   affine_image: (d) => {
     const B = bornes[d];
@@ -4295,20 +4419,21 @@ const generateurs = {
   // FR02.1 — Appartenance d'un point à une courbe
   fr02_appart: (d) => {
     if (d === 1) {
+      // Facile : appartenance à une droite (fonction affine)
       const a = randNonZero(2, 5);
       const b = randNonZero(-5, 5);
       const x = randNonZero(-3, 3);
       const yJuste = a*x + b;
-      const yFaux = yJuste + randNonZero(2, 5);
       const point = pick([true, false]);
-      const y = point ? yJuste : yFaux;
-      const signB = b >= 0 ? '+' : '-';
-      const absB = Math.abs(b);
+      const y = point ? yJuste : yJuste + randNonZero(2, 5);
+      const sB = b >= 0 ? `+ ${b}` : `- ${-b}`;
+      const xAff = x < 0 ? `(${x})` : `${x}`;
       return {
-        enonce: `Soit $f(x) = ${a}x ${signB} ${absB}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
-        corrige: `$f(${x}) = ${a} \\times ${x} ${signB} ${absB} = ${yJuste}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient bien à la courbe.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe.`}`
+        enonce: `Soit $f(x) = ${a}x ${sB}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
+        corrige: `On calcule $f(${x}) = ${a} \\times ${xAff} ${sB} = ${a*x} ${sB} = ${yJuste}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient bien à la courbe de $f$.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe de $f$.`}`
       };
     } else if (d === 2) {
+      // Moyen : appartenance à une parabole (fonction du second degré)
       const a = randNonZero(1, 3);
       const b = randNonZero(-3, 3);
       const c = randNonZero(-5, 5);
@@ -4316,19 +4441,83 @@ const generateurs = {
       const yJuste = a*x*x + b*x + c;
       const point = pick([true, false]);
       const y = point ? yJuste : yJuste + randNonZero(2, 4);
-      const signB = b >= 0 ? '+' : '-';
-      const absB = Math.abs(b);
-      const signC = c >= 0 ? '+' : '-';
-      const absC = Math.abs(c);
+      // Affichage propre de "ax² ± bx ± c"
+      const sB = b >= 0 ? `+ ${b}x` : `- ${-b}x`;
+      const sC = c >= 0 ? `+ ${c}` : `- ${-c}`;
+      const xAff = x < 0 ? `(${x})` : `${x}`;
+      // Calcul intermédiaire bien affiché
+      const ax2 = a*x*x;
+      const bx = b*x;
+      const sBx = bx >= 0 ? `+ ${bx}` : `- ${-bx}`;
       return {
-        enonce: `Soit $f(x) = ${a}x^2 ${signB} ${absB}x ${signC} ${absC}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
-        corrige: `$f(${x}) = ${a} \\times ${x}^2 ${signB} ${absB} \\times ${x} ${signC} ${absC} = ${yJuste}$. ${point ? `Donc $A$ appartient à la courbe.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe.`}`
+        enonce: `Soit $f(x) = ${a}x^2 ${sB} ${sC}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
+        corrige: `On calcule $f(${x}) = ${a} \\times ${xAff}^2 ${sB.replace('x', ` \\times ${xAff}`)} ${sC} = ${ax2} ${sBx} ${sC} = ${yJuste}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient à la courbe de $f$.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe de $f$.`}`
       };
     } else {
-      return {
-        enonce: `Soit $f(x) = 2x^2 - 5x + 3$. Trouver un antécédent de $0$ par $f$ parmi $\\{0\\,;\\,1\\,;\\,-1\\,;\\,2\\}$.`,
-        corrige: `$f(0) = 3$, $f(1) = 2 - 5 + 3 = 0$ ✓. Donc $1$ est un antécédent de $0$.`
-      };
+      // Difficile : appartenance à une fonction rationnelle (forme a/(x+b))
+      const variantes = [
+        () => {
+          // f(x) = a/(x+b) : éviter x = -b (division par 0)
+          const a = randNonZero(2, 8);
+          let b = randNonZero(-3, 3);
+          let x = randNonZero(-3, 3);
+          while (x + b === 0) { x = randNonZero(-3, 3); }
+          const yJuste = a / (x + b);
+          // S'assurer que yJuste est un entier pour rester lisible
+          if (!Number.isInteger(yJuste)) {
+            // ajuster a pour que (x+b) divise a
+            const denom = x + b;
+            const aBis = denom * randNonZero(1, 4);
+            const yJusteBis = aBis / denom;
+            const point = pick([true, false]);
+            const y = point ? yJusteBis : yJusteBis + randNonZero(1, 3);
+            const sB = b >= 0 ? `+ ${b}` : `- ${-b}`;
+            const xAff = x < 0 ? `(${x})` : `${x}`;
+            return {
+              enonce: `Soit $f(x) = \\dfrac{${aBis}}{x ${sB}}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
+              corrige: `On calcule $f(${x}) = \\dfrac{${aBis}}{${xAff} ${sB}} = \\dfrac{${aBis}}{${denom}} = ${yJusteBis}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient à la courbe.` : `Comme $f(${x}) = ${yJusteBis} \\neq ${y}$, le point $A$ n'appartient pas à la courbe.`}`
+            };
+          }
+          const point = pick([true, false]);
+          const y = point ? yJuste : yJuste + randNonZero(1, 3);
+          const sB = b >= 0 ? `+ ${b}` : `- ${-b}`;
+          const xAff = x < 0 ? `(${x})` : `${x}`;
+          return {
+            enonce: `Soit $f(x) = \\dfrac{${a}}{x ${sB}}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
+            corrige: `On calcule $f(${x}) = \\dfrac{${a}}{${xAff} ${sB}} = \\dfrac{${a}}{${x+b}} = ${yJuste}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient à la courbe.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe.`}`
+          };
+        },
+        () => {
+          // f(x) = (ax + b) / c
+          const c = randNonZero(2, 4);
+          const a = randNonZero(2, 5);
+          const b = randNonZero(-5, 5);
+          const x = randNonZero(-3, 3);
+          const num = a*x + b;
+          // Forcer un résultat entier (sinon retomber sur c=1)
+          if (num % c !== 0) {
+            const yJuste = num;
+            const point = pick([true, false]);
+            const y = point ? yJuste : yJuste + randNonZero(1, 3);
+            const sB = b >= 0 ? `+ ${b}` : `- ${-b}`;
+            const xAff = x < 0 ? `(${x})` : `${x}`;
+            return {
+              enonce: `Soit $f(x) = ${a}x ${sB}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
+              corrige: `On calcule $f(${x}) = ${a} \\times ${xAff} ${sB} = ${a*x} ${sB} = ${yJuste}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient à la courbe.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe.`}`
+            };
+          }
+          const yJuste = num / c;
+          const point = pick([true, false]);
+          const y = point ? yJuste : yJuste + randNonZero(1, 3);
+          const sB = b >= 0 ? `+ ${b}` : `- ${-b}`;
+          const xAff = x < 0 ? `(${x})` : `${x}`;
+          return {
+            enonce: `Soit $f(x) = \\dfrac{${a}x ${sB}}{${c}}$. Le point $A(${x}\\,;\\,${y})$ appartient-il à la courbe de $f$ ?`,
+            corrige: `On calcule $f(${x}) = \\dfrac{${a} \\times ${xAff} ${sB}}{${c}} = \\dfrac{${a*x} ${sB}}{${c}} = \\dfrac{${num}}{${c}} = ${yJuste}$. ${point ? `Comme $f(${x}) = ${y}$, le point $A$ appartient à la courbe.` : `Comme $f(${x}) = ${yJuste} \\neq ${y}$, le point $A$ n'appartient pas à la courbe.`}`
+          };
+        }
+      ];
+      return pick(variantes)();
     }
   },
 
@@ -5337,14 +5526,28 @@ const generateurs = {
     // Helpers pour bien afficher les soustractions
     const formSous = (a, b) => b >= 0 ? `${a} - ${b}` : `${a} - (${b})`;
     if (d === 1) {
-      const xA = randNonZero(-5, 5);
-      const yA = randNonZero(-5, 5);
-      const xB = randNonZero(-5, 5);
-      const yB = randNonZero(-5, 5);
+      // Coordonnées restreintes à [-3, 3] pour que A et B entrent dans le repère
+      const xA = randNonZero(-3, 3);
+      const yA = randNonZero(-3, 3);
+      let xB = randNonZero(-3, 3);
+      let yB = randNonZero(-3, 3);
+      // Éviter A = B
+      while (xA === xB && yA === yB) {
+        xB = randNonZero(-3, 3);
+        yB = randNonZero(-3, 3);
+      }
       const dx = xB - xA;
       const dy = yB - yA;
+      // Figure : repère avec A, B et vecteur AB
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += tracerVecteur(r, xA, yA, xB, yB, { label: '\u2192' });
+      svg += r.fermer();
       return {
-        enonce: `Soient $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$. Calculer les coordonnées du vecteur $\\vec{AB}$.`,
+        enonce: `Soient $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$ (voir figure ci-contre). Calculer les coordonnées du vecteur $\\vec{AB}$.`,
+        svg: svg,
         corrige: `$\\vec{AB}\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix} = \\begin{pmatrix} ${formSous(xB, xA)} \\\\ ${formSous(yB, yA)} \\end{pmatrix} = \\begin{pmatrix} ${dx} \\\\ ${dy} \\end{pmatrix}$.`
       };
     } else if (d === 2) {
@@ -5517,38 +5720,60 @@ const generateurs = {
   // GÉO - Trigonométrie - Calcul d'une longueur
   trigo_long: (d) => {
     if (d === 1) {
-      // Facile : longueur de l'hypoténuse ou d'un côté avec angle remarquable
+      // Facile : longueur de l'hypoténuse avec angle remarquable + figure
       const variantes = [
-        { angle: 30, cote: 5, formule: '\\cos', val: '\\dfrac{\\sqrt{3}}{2}', nomCote: "côté adjacent", res: (5 / Math.cos(Math.PI/6)).toFixed(2) },
-        { angle: 45, cote: 7, formule: '\\cos', val: '\\dfrac{\\sqrt{2}}{2}', nomCote: "côté adjacent", res: (7 / Math.cos(Math.PI/4)).toFixed(2) },
-        { angle: 60, cote: 6, formule: '\\sin', val: '\\dfrac{\\sqrt{3}}{2}', nomCote: "côté opposé", res: (6 / Math.sin(Math.PI/3)).toFixed(2) }
+        { angle: 30, cote: 5, formule: '\\cos', val: '\\dfrac{\\sqrt{3}}{2}', nomCote: "côté adjacent", res: (5 / Math.cos(Math.PI/6)).toFixed(2), opp: null, adj: '5', hyp: '?' },
+        { angle: 45, cote: 7, formule: '\\cos', val: '\\dfrac{\\sqrt{2}}{2}', nomCote: "côté adjacent", res: (7 / Math.cos(Math.PI/4)).toFixed(2), opp: null, adj: '7', hyp: '?' },
+        { angle: 60, cote: 6, formule: '\\sin', val: '\\dfrac{\\sqrt{3}}{2}', nomCote: "côté opposé", res: (6 / Math.sin(Math.PI/3)).toFixed(2), opp: '6', adj: null, hyp: '?' }
       ];
       const v = pick(variantes);
+      const svg = tracerTriangleRectangle({
+        angleDeg: v.angle,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: v.adj, opp: v.opp, hyp: v.hyp,
+        angleNom: `${v.angle}°`
+      });
       return {
-        enonce: `Dans un triangle rectangle $ABC$ rectangle en $A$, on a $\\widehat{ABC} = ${v.angle}°$ et le ${v.nomCote} à l'angle $\\widehat{ABC}$ mesure $${v.cote}$ cm. Calculer la longueur de l'hypoténuse $BC$ (arrondie au centième).`,
+        enonce: `Dans le triangle $ABC$ rectangle en $A$ ci-contre, calculer la longueur de l'hypoténuse $BC$ (arrondie au centième).`,
+        svg: svg,
         corrige: `$${v.formule}(${v.angle}°) = \\dfrac{\\text{${v.nomCote}}}{\\text{hypoténuse}}$, donc $BC = \\dfrac{${v.cote}}{${v.formule}(${v.angle}°)} \\approx ${v.res}$ cm.`
       };
     } else if (d === 2) {
-      // Moyen : trouver un côté avec sin, cos ou tan
+      // Moyen : trouver un côté avec sin, cos ou tan + figure
       const variantes = [
-        { angle: 35, base: 10, baseName: "l'hypoténuse", baseValue: 10, calc: 10*Math.sin(35*Math.PI/180), formule: '\\sin', nomCote: 'opposé', ratioName: 'opposé sur hypoténuse' },
-        { angle: 40, base: 12, baseName: "l'hypoténuse", baseValue: 12, calc: 12*Math.cos(40*Math.PI/180), formule: '\\cos', nomCote: 'adjacent', ratioName: 'adjacent sur hypoténuse' },
-        { angle: 25, base: 8, baseName: "le côté adjacent", baseValue: 8, calc: 8*Math.tan(25*Math.PI/180), formule: '\\tan', nomCote: 'opposé', ratioName: 'opposé sur adjacent' }
+        { angle: 35, baseValue: 10, calc: 10*Math.sin(35*Math.PI/180), formule: '\\sin', nomCote: 'opposé', baseRole: 'hyp', adj: null, opp: '?', hyp: '10' },
+        { angle: 40, baseValue: 12, calc: 12*Math.cos(40*Math.PI/180), formule: '\\cos', nomCote: 'adjacent', baseRole: 'hyp', adj: '?', opp: null, hyp: '12' },
+        { angle: 25, baseValue: 8, calc: 8*Math.tan(25*Math.PI/180), formule: '\\tan', nomCote: 'opposé', baseRole: 'adj', adj: '8', opp: '?', hyp: null }
       ];
       const v = pick(variantes);
       const valTrigo = (v.formule === '\\sin' ? Math.sin(v.angle*Math.PI/180) : v.formule === '\\cos' ? Math.cos(v.angle*Math.PI/180) : Math.tan(v.angle*Math.PI/180));
+      const baseName = v.baseRole === 'hyp' ? "l'hypoténuse" : 'le côté adjacent';
+      const svg = tracerTriangleRectangle({
+        angleDeg: v.angle,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: v.adj, opp: v.opp, hyp: v.hyp,
+        angleNom: `${v.angle}°`
+      });
       return {
-        enonce: `Dans un triangle rectangle, on connaît un angle aigu de $${v.angle}°$ et ${v.baseName} mesure $${v.baseValue}$ cm. Calculer la longueur du côté ${v.nomCote} (arrondie au centième).`,
+        enonce: `Dans le triangle ci-contre rectangle en $A$, ${baseName} mesure $${v.baseValue}$ cm. Calculer la longueur du côté ${v.nomCote} (arrondie au centième).`,
+        svg: svg,
         corrige: `On utilise $${v.formule}(${v.angle}°) \\approx ${valTrigo.toFixed(4)}$. Côté ${v.nomCote} $= ${v.baseValue} \\times ${v.formule}(${v.angle}°) \\approx ${v.calc.toFixed(2)}$ cm.`
       };
     } else {
-      // Difficile : trouver hypoténuse à partir du côté opposé et de l'angle
+      // Difficile : trouver hypoténuse à partir du côté opposé et de l'angle + figure
       const angle = pick([25, 35, 50, 65, 70]);
       const opp = rand(4, 10);
       const sinA = Math.sin(angle*Math.PI/180);
       const hyp = opp / sinA;
+      const svg = tracerTriangleRectangle({
+        angleDeg: angle,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: null, opp: `${opp}`, hyp: '?',
+        angleNom: `${angle}°`
+      });
       return {
-        enonce: `Dans un triangle rectangle, on connaît un angle aigu de $${angle}°$ et le côté opposé à cet angle mesure $${opp}$ cm. Calculer la longueur de l'hypoténuse (arrondie au centième).`,
+        enonce: `Dans le triangle ci-contre rectangle en $A$, le côté opposé à l'angle de $${angle}°$ mesure $${opp}$ cm. Calculer la longueur de l'hypoténuse (arrondie au centième).`,
+        svg: svg,
         corrige: `$\\sin(${angle}°) = \\dfrac{\\text{opposé}}{\\text{hypoténuse}}$, donc hypoténuse $= \\dfrac{${opp}}{\\sin(${angle}°)} \\approx \\dfrac{${opp}}{${sinA.toFixed(4)}} \\approx ${hyp.toFixed(2)}$ cm.`
       };
     }
@@ -5557,6 +5782,7 @@ const generateurs = {
   // GÉO - Trigonométrie - Calcul d'un angle
   trigo_angle: (d) => {
     if (d === 1) {
+      // Facile : valeurs remarquables, pas besoin de figure
       const variantes = [
         { rapport: '\\dfrac{1}{2}', formule: 'cos', valeur: 60 },
         { rapport: '\\dfrac{\\sqrt{2}}{2}', formule: 'sin', valeur: 45 },
@@ -5570,21 +5796,37 @@ const generateurs = {
         corrige: `Par les valeurs remarquables, $\\${v.formule}(\\alpha) = ${v.rapport}$ donne $\\alpha = ${v.valeur}°$.`
       };
     } else if (d === 2) {
+      // Moyen : trouver alpha à partir de hyp et opp + figure
       const hyp = rand(8, 15);
       const opp = rand(3, hyp-1);
       const sinA = opp/hyp;
       const angle = Math.asin(sinA) * 180 / Math.PI;
+      const svg = tracerTriangleRectangle({
+        angleDeg: angle,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: null, opp: `${opp}`, hyp: `${hyp}`,
+        angleNom: 'α'
+      });
       return {
-        enonce: `Dans un triangle rectangle, l'hypoténuse mesure $${hyp}$ cm et le côté opposé à un angle $\\alpha$ mesure $${opp}$ cm. Calculer la mesure de $\\alpha$ (arrondie au degré).`,
+        enonce: `Dans le triangle ci-contre rectangle en $A$, calculer la mesure de l'angle $\\alpha$ (arrondie au degré).`,
+        svg: svg,
         corrige: `$\\sin(\\alpha) = \\dfrac{\\text{opposé}}{\\text{hypoténuse}} = \\dfrac{${opp}}{${hyp}} \\approx ${sinA.toFixed(4)}$. Donc $\\alpha = \\arcsin(${sinA.toFixed(4)}) \\approx ${Math.round(angle)}°$.`
       };
     } else {
+      // Difficile : trouver alpha à partir de adj et opp + figure
       const adj = rand(4, 10);
       const opp = rand(3, 10);
       const tanA = opp/adj;
       const angle = Math.atan(tanA) * 180 / Math.PI;
+      const svg = tracerTriangleRectangle({
+        angleDeg: angle,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: `${adj}`, opp: `${opp}`, hyp: null,
+        angleNom: 'α'
+      });
       return {
-        enonce: `Dans un triangle rectangle, le côté adjacent à un angle $\\alpha$ mesure $${adj}$ cm et le côté opposé mesure $${opp}$ cm. Calculer la mesure de $\\alpha$ (arrondie au degré).`,
+        enonce: `Dans le triangle ci-contre rectangle en $A$, calculer la mesure de l'angle $\\alpha$ (arrondie au degré).`,
+        svg: svg,
         corrige: `$\\tan(\\alpha) = \\dfrac{\\text{opposé}}{\\text{adjacent}} = \\dfrac{${opp}}{${adj}} \\approx ${tanA.toFixed(4)}$. Donc $\\alpha = \\arctan(${tanA.toFixed(4)}) \\approx ${Math.round(angle)}°$.`
       };
     }
@@ -5593,6 +5835,7 @@ const generateurs = {
   // GÉO - Trigonométrie - Identifier sin/cos/tan
   trigo_rapports: (d) => {
     if (d === 1) {
+      // Facile : pas besoin de figure (question théorique)
       const variantes = [
         { question: "Quel rapport représente $\\sin(\\alpha)$ dans un triangle rectangle ?", reponse: "$\\sin(\\alpha) = \\dfrac{\\text{côté opposé}}{\\text{hypoténuse}}$." },
         { question: "Quel rapport représente $\\cos(\\alpha)$ dans un triangle rectangle ?", reponse: "$\\cos(\\alpha) = \\dfrac{\\text{côté adjacent}}{\\text{hypoténuse}}$." },
@@ -5604,24 +5847,43 @@ const generateurs = {
         corrige: v.reponse
       };
     } else if (d === 2) {
+      // Moyen : donner sin/cos/tan d'un angle à partir des 2 côtés + figure
       const adj = rand(3, 8);
       const opp = rand(3, 8);
       const hypCarre = adj*adj + opp*opp;
       const racine = Math.sqrt(hypCarre);
       const hypFmt = Number.isInteger(racine) ? `${racine}` : `\\sqrt{${hypCarre}}`;
       const variantes = [
-        { trigo: 'sin', val: `\\dfrac{${opp}}{${hypFmt}}`, explication: `Côté opposé $= ${opp}$, hypoténuse $= ${hypFmt}$ (calculée par Pythagore : $\\sqrt{${adj}^2 + ${opp}^2} = \\sqrt{${hypCarre}}$).` },
-        { trigo: 'cos', val: `\\dfrac{${adj}}{${hypFmt}}`, explication: `Côté adjacent $= ${adj}$, hypoténuse $= ${hypFmt}$ (calculée par Pythagore : $\\sqrt{${adj}^2 + ${opp}^2} = \\sqrt{${hypCarre}}$).` },
+        { trigo: 'sin', val: `\\dfrac{${opp}}{${hypFmt}}`, explication: `Côté opposé $= ${opp}$, hypoténuse $= ${hypFmt}$ (par Pythagore : $\\sqrt{${adj}^2 + ${opp}^2} = \\sqrt{${hypCarre}}$).` },
+        { trigo: 'cos', val: `\\dfrac{${adj}}{${hypFmt}}`, explication: `Côté adjacent $= ${adj}$, hypoténuse $= ${hypFmt}$ (par Pythagore : $\\sqrt{${adj}^2 + ${opp}^2} = \\sqrt{${hypCarre}}$).` },
         { trigo: 'tan', val: `\\dfrac{${opp}}{${adj}}`, explication: `Côté opposé $= ${opp}$, côté adjacent $= ${adj}$.` }
       ];
       const v = pick(variantes);
+      // Calculer l'angle approximatif pour la figure
+      const angleApprox = Math.atan(opp/adj) * 180 / Math.PI;
+      const svg = tracerTriangleRectangle({
+        angleDeg: angleApprox,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: `${adj}`, opp: `${opp}`, hyp: null,
+        angleNom: 'α'
+      });
       return {
-        enonce: `Dans un triangle rectangle, le côté opposé à un angle $\\alpha$ mesure $${opp}$ cm et le côté adjacent mesure $${adj}$ cm. Donner $\\${v.trigo}(\\alpha)$ sous forme exacte.`,
+        enonce: `Dans le triangle ci-contre rectangle en $A$, donner $\\${v.trigo}(\\alpha)$ sous forme exacte.`,
+        svg: svg,
         corrige: `${v.explication} Donc $\\${v.trigo}(\\alpha) = ${v.val}$.`
       };
     } else {
+      // Difficile : exprimer sin/cos/tan en fonction des côtés AB, AC, BC + figure générique
+      // On utilise une figure avec angle 45° pour montrer la position d'AB, AC, BC
+      const svg = tracerTriangleRectangle({
+        angleDeg: 42,
+        sommetA: 'A', sommetB: 'B', sommetC: 'C',
+        adj: 'AB', opp: 'AC', hyp: 'BC',
+        angleNom: 'B̂'
+      });
       return {
-        enonce: `Dans le triangle $ABC$ rectangle en $A$, on connaît $AB$, $AC$ et $BC$. Exprimer $\\sin(\\widehat{ABC})$, $\\cos(\\widehat{ABC})$ et $\\tan(\\widehat{ABC})$ en fonction de $AB$, $AC$ et $BC$.`,
+        enonce: `Dans le triangle $ABC$ rectangle en $A$ ci-contre, exprimer $\\sin(\\widehat{ABC})$, $\\cos(\\widehat{ABC})$ et $\\tan(\\widehat{ABC})$ en fonction de $AB$, $AC$ et $BC$.`,
+        svg: svg,
         corrige: `Pour l'angle $\\widehat{ABC}$ : côté opposé $= AC$, côté adjacent $= AB$, hypoténuse $= BC$. Donc $\\sin(\\widehat{ABC}) = \\dfrac{AC}{BC}$, $\\cos(\\widehat{ABC}) = \\dfrac{AB}{BC}$, $\\tan(\\widehat{ABC}) = \\dfrac{AC}{AB}$.`
       };
     }
@@ -5630,19 +5892,29 @@ const generateurs = {
   // GÉO - Repérage - Distance entre 2 points
   rep_dist: (d) => {
     if (d === 1) {
-      const triplets = [[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17]];
-      const [a, b, c] = pick(triplets);
-      const xA = randNonZero(-3, 3);
-      const yA = randNonZero(-3, 3);
-      const xB = xA + (pick([1,-1])*a);
-      const yB = yA + (pick([1,-1])*b);
-      const dx = xB - xA;
-      const dy = yB - yA;
+      // Triplet 3-4-5 uniquement pour que tout rentre dans le repère [-3, 3]
+      // On place A et B tels que dx=3, dy=4 (ou variantes) avec A et B dans le repère
+      const variantes = [
+        { xA: -1, yA: -2, xB: 2, yB: 2, c: 5 },  // (3, 4) → 5
+        { xA: 1, yA: 2, xB: -2, yB: -2, c: 5 },  // (-3, -4) → 5
+        { xA: -2, yA: 1, xB: 1, yB: -3, c: 5 },  // (3, -4) → 5
+        { xA: 0, yA: 3, xB: 3, yB: -1, c: 5 }    // (3, -4) → 5
+      ];
+      const v = pick(variantes);
+      const dx = v.xB - v.xA;
+      const dy = v.yB - v.yA;
       const dxAff = dx >= 0 ? `${dx}` : `(${dx})`;
       const dyAff = dy >= 0 ? `${dy}` : `(${dy})`;
+      // Figure
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, v.xA, v.yA, 'A');
+      svg += placerPoint(r, v.xB, v.yB, 'B');
+      svg += r.fermer();
       return {
-        enonce: `Calculer la distance $AB$ entre les points $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$.`,
-        corrige: `$AB = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2} = \\sqrt{${dxAff}^2 + ${dyAff}^2} = \\sqrt{${dx*dx} + ${dy*dy}} = \\sqrt{${dx*dx+dy*dy}} = ${c}$.`
+        enonce: `Calculer la distance $AB$ entre les points $A(${v.xA}\\,;\\,${v.yA})$ et $B(${v.xB}\\,;\\,${v.yB})$ (voir figure ci-contre).`,
+        svg: svg,
+        corrige: `$AB = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2} = \\sqrt{${dxAff}^2 + ${dyAff}^2} = \\sqrt{${dx*dx} + ${dy*dy}} = \\sqrt{${dx*dx+dy*dy}} = ${v.c}$.`
       };
     } else if (d === 2) {
       const xA = randNonZero(-4, 4);
@@ -5685,15 +5957,27 @@ const generateurs = {
       // Pour avoir milieu entier, on choisit A et B de même parité
       const xA = pick([-4, -2, 0, 2, 4]);
       const yA = pick([-4, -2, 0, 2, 4]);
-      const xB = pick([-4, -2, 0, 2, 4]);
-      const yB = pick([-4, -2, 0, 2, 4]);
+      let xB = pick([-4, -2, 0, 2, 4]);
+      let yB = pick([-4, -2, 0, 2, 4]);
+      while (xA === xB && yA === yB) {
+        xB = pick([-4, -2, 0, 2, 4]);
+        yB = pick([-4, -2, 0, 2, 4]);
+      }
       const xMmi = (xA + xB) / 2;
       const yMmi = (yA + yB) / 2;
-      // Formater proprement les additions (éviter "2 + -4")
       const xBaff = xB < 0 ? `(${xB})` : `${xB}`;
       const yBaff = yB < 0 ? `(${yB})` : `${yB}`;
+      // Figure : repère avec A, B, et segment [AB]
+      const r = creerRepere({});
+      let svg = r.svg;
+      // Segment AB en trait fin
+      svg += `<line x1="${r.xPix(xA)}" y1="${r.yPix(yA)}" x2="${r.xPix(xB)}" y2="${r.yPix(yB)}" stroke="${GRAPH_BLEU}" stroke-width="1" stroke-dasharray="3,2"/>`;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += r.fermer();
       return {
-        enonce: `Calculer les coordonnées du milieu $M$ du segment $[AB]$ avec $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$.`,
+        enonce: `Calculer les coordonnées du milieu $M$ du segment $[AB]$ avec $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$ (voir figure ci-contre).`,
+        svg: svg,
         corrige: `$x_M = \\dfrac{x_A + x_B}{2} = \\dfrac{${xA} + ${xBaff}}{2} = \\dfrac{${xA+xB}}{2} = ${xMmi}$. De même $y_M = \\dfrac{${yA} + ${yBaff}}{2} = ${yMmi}$. Donc $M(${xMmi}\\,;\\,${yMmi})$.`
       };
     } else if (d === 2) {
