@@ -582,8 +582,22 @@ function creerRepere(opts) {
   // Cadre fond blanc
   svg += `<rect x="${margeG}" y="${margeH}" width="${zoneW}" height="${zoneH}" fill="${GRAPH_FOND}" stroke="${GRAPH_BORDURE}" stroke-width="1"/>`;
   
-  // Grille verticale
-  svg += `<g stroke="${GRAPH_OR_CLAIR}" stroke-width="0.5">`;
+  // Sous-grille aux demi-graduations (très claire, pour aide à la lecture)
+  svg += `<g stroke="#f0e8d6" stroke-width="0.4">`;
+  for (let x = Math.ceil(o.xMin * 2) / 2; x <= o.xMax; x += 0.5) {
+    if (x !== Math.floor(x)) { // seulement les demi-graduations
+      svg += `<line x1="${xPix(x).toFixed(2)}" y1="${margeH}" x2="${xPix(x).toFixed(2)}" y2="${margeH + zoneH}"/>`;
+    }
+  }
+  for (let y = Math.ceil(o.yMin * 2) / 2; y <= o.yMax; y += 0.5) {
+    if (y !== Math.floor(y)) {
+      svg += `<line x1="${margeG}" y1="${yPix(y).toFixed(2)}" x2="${margeG + zoneW}" y2="${yPix(y).toFixed(2)}"/>`;
+    }
+  }
+  svg += `</g>`;
+  
+  // Grille principale aux entiers (renforcée)
+  svg += `<g stroke="#dcc9a8" stroke-width="0.7">`;
   for (let x = Math.ceil(o.xMin); x <= Math.floor(o.xMax); x += o.gradX) {
     if (x !== 0) svg += `<line x1="${xPix(x)}" y1="${margeH}" x2="${xPix(x)}" y2="${margeH + zoneH}"/>`;
   }
@@ -2405,11 +2419,26 @@ const generateurs = {
         corrige: `$\\dfrac{${a} \\times b \\times c}{${a}} = b \\times c$ (on simplifie par $${a}$).`
       };
     } else {
-      // Difficile : combinaison
-      return {
-        enonce: `Démontrer que si $\\dfrac{1}{x} + \\dfrac{1}{y} = \\dfrac{1}{u}$ alors $u = \\dfrac{xy}{x+y}$.`,
-        corrige: `$\\dfrac{1}{x} + \\dfrac{1}{y} = \\dfrac{y + x}{xy} = \\dfrac{1}{u}$, donc $u = \\dfrac{xy}{x+y}$.`
-      };
+      // Difficile : plusieurs variantes de manipulations algébriques avec fractions
+      const variantes = [
+        () => ({
+          enonce: `Démontrer que si $\\dfrac{1}{x} + \\dfrac{1}{y} = \\dfrac{1}{u}$ (avec $x, y, u$ non nuls), alors $u = \\dfrac{xy}{x+y}$.`,
+          corrige: `$\\dfrac{1}{x} + \\dfrac{1}{y} = \\dfrac{y + x}{xy} = \\dfrac{1}{u}$. En inversant : $u = \\dfrac{xy}{x+y}$.`
+        }),
+        () => ({
+          enonce: `Simplifier l'expression $\\dfrac{2x + 4}{x + 2}$ pour $x \\neq -2$.`,
+          corrige: `On factorise le numérateur : $2x + 4 = 2(x + 2)$. Donc $\\dfrac{2(x+2)}{x+2} = 2$.`
+        }),
+        () => ({
+          enonce: `Simplifier l'expression $\\dfrac{3x^2 - 6x}{3x}$ pour $x \\neq 0$.`,
+          corrige: `On factorise le numérateur : $3x^2 - 6x = 3x(x - 2)$. Donc $\\dfrac{3x(x-2)}{3x} = x - 2$.`
+        }),
+        () => ({
+          enonce: `Écrire $\\dfrac{a}{b} + \\dfrac{c}{d}$ sous forme d'une seule fraction (avec $b, d$ non nuls).`,
+          corrige: `On met au même dénominateur $bd$ : $\\dfrac{a}{b} + \\dfrac{c}{d} = \\dfrac{ad}{bd} + \\dfrac{bc}{bd} = \\dfrac{ad + bc}{bd}$.`
+        })
+      ];
+      return pick(variantes)();
     }
   },
 
@@ -2870,7 +2899,11 @@ const generateurs = {
         () => ({ enonce: `On a $\\dfrac{1}{x} + \\dfrac{1}{y} = \\dfrac{1}{u}$ (avec $x, y, u \\neq 0$). Exprimer $u$ en fonction de $x$ et $y$.`,
                  corrige: `$\\dfrac{1}{u} = \\dfrac{y + x}{xy}$, donc $u = \\dfrac{xy}{x + y}$.` }),
         () => ({ enonce: `L'accélération centripète vaut $a = \\dfrac{v^2}{R}$. Exprimer $v$ en fonction de $a$ et $R$ (avec $v > 0$).`,
-                 corrige: `$v^2 = a \\times R$, donc $v = \\sqrt{aR}$.` })
+                 corrige: `$v^2 = a \\times R$, donc $v = \\sqrt{aR}$.` }),
+        () => ({ enonce: `La formule des résistances en parallèle est $\\dfrac{1}{R} = \\dfrac{1}{R_1} + \\dfrac{1}{R_2}$. Exprimer $R$ en fonction de $R_1$ et $R_2$.`,
+                 corrige: `$\\dfrac{1}{R} = \\dfrac{R_2 + R_1}{R_1 R_2}$, donc $R = \\dfrac{R_1 R_2}{R_1 + R_2}$.` }),
+        () => ({ enonce: `On a $T = 2\\pi \\sqrt{\\dfrac{L}{g}}$ (période d'un pendule). Exprimer $L$ en fonction de $T$ et $g$.`,
+                 corrige: `$\\dfrac{T}{2\\pi} = \\sqrt{\\dfrac{L}{g}}$, donc $\\dfrac{T^2}{4\\pi^2} = \\dfrac{L}{g}$, soit $L = \\dfrac{gT^2}{4\\pi^2}$.` })
       ];
       return pick(variantes)();
     }
@@ -2879,16 +2912,25 @@ const generateurs = {
   // CA04.2 — Isoler avec un carré
   ca04_avec_carre: (d) => {
     if (d === 1) {
-      return {
-        enonce: `On a $A = c^2$ avec $c > 0$. Exprimer $c$ en fonction de $A$.`,
-        corrige: `$c = \\sqrt{A}$.`
-      };
+      const variantes = [
+        () => ({ enonce: `On a $A = c^2$ avec $c > 0$. Exprimer $c$ en fonction de $A$.`,
+                 corrige: `$c = \\sqrt{A}$.` }),
+        () => ({ enonce: `On a $V = a^3$ avec $a > 0$ (volume d'un cube de côté $a$). Exprimer $a$ en fonction de $V$.`,
+                 corrige: `$a = \\sqrt[3]{V}$ (racine cubique).` }),
+        () => ({ enonce: `On a $y = x^2$ avec $x > 0$. Exprimer $x$ en fonction de $y$.`,
+                 corrige: `$x = \\sqrt{y}$.` })
+      ];
+      return pick(variantes)();
     } else if (d === 2) {
       const variantes = [
         () => ({ enonce: `On a $A = \\pi r^2$ avec $r > 0$. Exprimer $r$ en fonction de $A$.`,
                  corrige: `$r^2 = \\dfrac{A}{\\pi}$, donc $r = \\sqrt{\\dfrac{A}{\\pi}}$.` }),
         () => ({ enonce: `L'énergie cinétique vaut $E = \\dfrac{1}{2}mv^2$. Exprimer $v$ en fonction de $E$ et $m$ (avec $v > 0$).`,
-                 corrige: `$v^2 = \\dfrac{2E}{m}$, donc $v = \\sqrt{\\dfrac{2E}{m}}$.` })
+                 corrige: `$v^2 = \\dfrac{2E}{m}$, donc $v = \\sqrt{\\dfrac{2E}{m}}$.` }),
+        () => ({ enonce: `L'aire d'un carré est $A = c^2$. Exprimer $c$ en fonction de $A$ (avec $c > 0$).`,
+                 corrige: `$c = \\sqrt{A}$.` }),
+        () => ({ enonce: `Le volume d'une sphère est $V = \\dfrac{4}{3}\\pi r^3$. Exprimer $r$ en fonction de $V$.`,
+                 corrige: `$r^3 = \\dfrac{3V}{4\\pi}$, donc $r = \\sqrt[3]{\\dfrac{3V}{4\\pi}}$.` })
       ];
       return pick(variantes)();
     } else {
@@ -2896,7 +2938,11 @@ const generateurs = {
         () => ({ enonce: `On a $C = (1 + t)^2$ avec $t > -1$. Exprimer $t$ en fonction de $C$.`,
                  corrige: `$1 + t = \\sqrt{C}$, donc $t = \\sqrt{C} - 1$.` }),
         () => ({ enonce: `On a $a^2 + b^2 = c^2$ (Pythagore). Exprimer $a$ en fonction de $b$ et $c$ (avec $a > 0$ et $c > b > 0$).`,
-                 corrige: `$a^2 = c^2 - b^2$, donc $a = \\sqrt{c^2 - b^2}$.` })
+                 corrige: `$a^2 = c^2 - b^2$, donc $a = \\sqrt{c^2 - b^2}$.` }),
+        () => ({ enonce: `On a $V_C = \\dfrac{1}{2} m \\omega^2 R^2$. Exprimer $\\omega$ en fonction de $V_C$, $m$ et $R$ (avec $\\omega > 0$).`,
+                 corrige: `$\\omega^2 = \\dfrac{2V_C}{m R^2}$, donc $\\omega = \\sqrt{\\dfrac{2V_C}{mR^2}} = \\dfrac{1}{R}\\sqrt{\\dfrac{2V_C}{m}}$.` }),
+        () => ({ enonce: `On a $(x - 3)^2 = K$ avec $K \\geq 0$. Exprimer les valeurs possibles de $x$ en fonction de $K$.`,
+                 corrige: `$x - 3 = \\pm\\sqrt{K}$, donc $x = 3 + \\sqrt{K}$ ou $x = 3 - \\sqrt{K}$.` })
       ];
       return pick(variantes)();
     }
@@ -3443,7 +3489,7 @@ const generateurs = {
           const k = 1.10 * 1.10;
           return {
             enonce: `Un prix subit une augmentation de $${t1}\\,\\%$ puis une autre augmentation de $${t2}\\,\\%$. Quel est le coefficient multiplicateur global ?`,
-            corrige: `Coefficient global : $1{,}10 \\times 1{,}10 = ${k.toString().replace('.', ',')}$, soit une augmentation globale de $${((k-1)*100).toString().replace('.', ',')}\\,\\%$.`
+            corrige: `Coefficient global : $1{,}10 \\times 1{,}10 = ${k.toString().replace('.', '{,}')}$, soit une augmentation globale de $${((k-1)*100).toString().replace('.', '{,}')}\\,\\%$.`
           };
         },
         () => {
@@ -3451,7 +3497,23 @@ const generateurs = {
           const k = 0.80 * 0.80;
           return {
             enonce: `Un prix subit une baisse de $${t1}\\,\\%$ puis une autre baisse de $${t2}\\,\\%$. Quel est le coefficient multiplicateur global ?`,
-            corrige: `Coefficient global : $0{,}80 \\times 0{,}80 = ${k.toString().replace('.', ',')}$, soit une baisse globale de $${((1-k)*100).toString().replace('.', ',')}\\,\\%$.`
+            corrige: `Coefficient global : $0{,}80 \\times 0{,}80 = ${k.toString().replace('.', '{,}')}$, soit une baisse globale de $${((1-k)*100).toString().replace('.', '{,}')}\\,\\%$.`
+          };
+        },
+        () => {
+          const t1 = 5; const t2 = 5;
+          const k = 1.05 * 1.05;
+          return {
+            enonce: `Un placement augmente de $${t1}\\,\\%$ la première année puis de $${t2}\\,\\%$ la deuxième année. Quel est le coefficient multiplicateur global ?`,
+            corrige: `Coefficient global : $1{,}05 \\times 1{,}05 = ${k.toString().replace('.', '{,}')}$, soit une augmentation globale de $${((k-1)*100).toFixed(2).replace('.', '{,}')}\\,\\%$.`
+          };
+        },
+        () => {
+          const t1 = 50; const t2 = 50;
+          const k = 1.50 * 0.50;
+          return {
+            enonce: `Un prix subit une augmentation de $${t1}\\,\\%$ puis une baisse de $${t2}\\,\\%$. Quel est le coefficient multiplicateur global ?`,
+            corrige: `Coefficient global : $1{,}5 \\times 0{,}5 = ${k.toString().replace('.', '{,}')}$, soit une baisse globale de $${((1-k)*100).toString().replace('.', '{,}')}\\,\\%$.`
           };
         }
       ];
@@ -3525,6 +3587,14 @@ const generateurs = {
         () => ({
           enonce: `Un prix a augmenté de $50\\,\\%$. Quel pourcentage de baisse faut-il appliquer pour retrouver le prix initial ?`,
           corrige: `Coefficient d'augmentation : $1{,}5$. Pour revenir à 1, il faut multiplier par $\\dfrac{1}{1{,}5} = \\dfrac{2}{3} \\approx 0{,}667$. Baisse : environ $33{,}3\\,\\%$.`
+        }),
+        () => ({
+          enonce: `Un prix a doublé. Quel pourcentage de baisse faut-il appliquer pour retrouver le prix initial ?`,
+          corrige: `Coefficient : $2$. Coefficient réciproque : $\\dfrac{1}{2} = 0{,}5$. Baisse de $50\\,\\%$.`
+        }),
+        () => ({
+          enonce: `Un prix a été divisé par $4$. Quel pourcentage d'augmentation faut-il appliquer pour retrouver le prix initial ?`,
+          corrige: `Coefficient : $\\dfrac{1}{4} = 0{,}25$. Coefficient réciproque : $4$. Augmentation : $300\\,\\%$.`
         })
       ];
       return pick(variantes)();
@@ -3666,6 +3736,14 @@ const generateurs = {
         () => ({
           enonce: `Soient $x, y > 0$. Comparer $A = \\dfrac{x+1}{y+1}$ et $B = \\dfrac{x}{y}$ quand $x < y$.`,
           corrige: `$A - B = \\dfrac{(x+1)y - x(y+1)}{y(y+1)} = \\dfrac{y - x}{y(y+1)}$. Si $x < y$, alors $y - x > 0$, donc $A > B$.`
+        }),
+        () => ({
+          enonce: `Comparer $C = \\dfrac{7}{11}$ et $D = \\dfrac{9}{14}$ par leur différence.`,
+          corrige: `$C - D = \\dfrac{7 \\times 14 - 9 \\times 11}{11 \\times 14} = \\dfrac{98 - 99}{154} = -\\dfrac{1}{154} < 0$. Donc $C < D$.`
+        }),
+        () => ({
+          enonce: `Comparer $E = \\dfrac{15}{22}$ et $F = \\dfrac{23}{34}$ en étudiant leur quotient.`,
+          corrige: `$\\dfrac{E}{F} = \\dfrac{15}{22} \\times \\dfrac{34}{23} = \\dfrac{510}{506} > 1$. Donc $E > F$.`
         })
       ];
       return pick(variantes)();
@@ -3898,7 +3976,11 @@ const generateurs = {
         () => ({ enonce: `Comparer rapidement $\\dfrac{1}{3}$ et $\\dfrac{19}{60}$ par ordre de grandeur.`,
                  corrige: `$\\dfrac{1}{3} = \\dfrac{20}{60}$. Donc $\\dfrac{19}{60} < \\dfrac{20}{60} = \\dfrac{1}{3}$.` }),
         () => ({ enonce: `Donner un ordre de grandeur du nombre de secondes en une année.`,
-                 corrige: `$365 \\times 24 \\times 3600 \\approx 400 \\times 25 \\times 4000 = 4 \\times 10^7$ s, environ $3{,}15 \\times 10^7$ s.` })
+                 corrige: `$365 \\times 24 \\times 3600 \\approx 400 \\times 25 \\times 4000 = 4 \\times 10^7$ s, environ $3{,}15 \\times 10^7$ s.` }),
+        () => ({ enonce: `Donner un ordre de grandeur du nombre de battements de cœur dans une vie humaine de $80$ ans (à raison de $70$ battements/min).`,
+                 corrige: `$80 \\times 365 \\times 24 \\times 60 \\times 70 \\approx 80 \\times 365 \\times 1{,}5 \\times 10^5 \\approx 3 \\times 10^9$ battements.` }),
+        () => ({ enonce: `Donner un ordre de grandeur de $\\dfrac{6{,}02 \\times 10^{23}}{18}$ (nombre d'atomes dans $1$ g d'eau).`,
+                 corrige: `$\\dfrac{6 \\times 10^{23}}{18} \\approx \\dfrac{6}{18} \\times 10^{23} = \\dfrac{1}{3} \\times 10^{23} \\approx 3 \\times 10^{22}$ atomes.` })
       ];
       return pick(variantes)();
     }
@@ -4100,14 +4182,20 @@ const generateurs = {
         () => ({ enonce: `Dans une classe de $25$ élèves, $5$ sont absents. Quelle est la proportion d'absents (forme décimale) ?`,
                  corrige: `Proportion : $\\dfrac{5}{25} = \\dfrac{1}{5} = 0{,}2$.` }),
         () => ({ enonce: `Dans un panier de $20$ fruits, $4$ sont des pommes. Quelle est la proportion de pommes (forme décimale) ?`,
-                 corrige: `Proportion : $\\dfrac{4}{20} = \\dfrac{1}{5} = 0{,}2$.` })
+                 corrige: `Proportion : $\\dfrac{4}{20} = \\dfrac{1}{5} = 0{,}2$.` }),
+        () => ({ enonce: `Dans un sac de $50$ billes, $15$ sont rouges. Quelle est la proportion de rouges (forme décimale) ?`,
+                 corrige: `Proportion : $\\dfrac{15}{50} = \\dfrac{3}{10} = 0{,}3$.` }),
+        () => ({ enonce: `Sur $40$ candidats à un concours, $10$ ont été admis. Quelle est la proportion d'admis (forme décimale) ?`,
+                 corrige: `Proportion : $\\dfrac{10}{40} = \\dfrac{1}{4} = 0{,}25$.` }),
+        () => ({ enonce: `Sur $200$ visiteurs d'une exposition, $80$ sont des enfants. Quelle est la proportion d'enfants (forme décimale) ?`,
+                 corrige: `Proportion : $\\dfrac{80}{200} = \\dfrac{2}{5} = 0{,}4$.` })
       ];
       return pick(variantes)();
     } else if (d === 2) {
       const total = pick([40, 50, 80, 100, 150, 200]);
       const partie = pick([6, 8, 12, 15, 18, 24]);
       const p = partie / total;
-      const pAff = Number.isInteger(p * 100) ? (Math.round(p * 100) / 100).toString().replace('.', ',') : p.toFixed(3).replace('.', ',');
+      const pAff = Number.isInteger(p * 100) ? (Math.round(p * 100) / 100).toString().replace('.', '{,}') : p.toFixed(3).replace('.', '{,}');
       return {
         enonce: `Sur $${total}$ personnes interrogées, $${partie}$ ont répondu « oui ». Quelle est la proportion de « oui » (forme décimale) ?`,
         corrige: `Proportion : $\\dfrac{${partie}}{${total}} = ${pAff}$.`
@@ -4117,7 +4205,11 @@ const generateurs = {
         () => ({ enonce: `Sur $90$ élèves, $3$ sont absents. Donner la proportion d'absents sous forme décimale arrondie au centième.`,
                  corrige: `$\\dfrac{3}{90} = \\dfrac{1}{30} \\approx 0{,}03$.` }),
         () => ({ enonce: `Sur $1250$ inscrits, $50$ étudient le grec. Donner la proportion (forme décimale).`,
-                 corrige: `$\\dfrac{50}{1250} = \\dfrac{4}{100} = 0{,}04$.` })
+                 corrige: `$\\dfrac{50}{1250} = \\dfrac{4}{100} = 0{,}04$.` }),
+        () => ({ enonce: `Sur $750$ électeurs, $120$ ont voté blanc. Donner la proportion sous forme décimale arrondie au millième.`,
+                 corrige: `$\\dfrac{120}{750} = \\dfrac{16}{100} = 0{,}16$.` }),
+        () => ({ enonce: `Sur $1800$ habitants d'un village, $72$ ont plus de $80$ ans. Donner la proportion sous forme décimale.`,
+                 corrige: `$\\dfrac{72}{1800} = \\dfrac{4}{100} = 0{,}04$.` })
       ];
       return pick(variantes)();
     }
@@ -4130,7 +4222,11 @@ const generateurs = {
         () => ({ enonce: `Dans un sac de $12$ billes, $3$ sont rouges. Quelle est la proportion de billes rouges (fraction irréductible) ?`,
                  corrige: `$\\dfrac{3}{12} = \\dfrac{1}{4}$.` }),
         () => ({ enonce: `Sur $20$ élèves, $8$ portent des lunettes. Quelle proportion porte des lunettes ?`,
-                 corrige: `$\\dfrac{8}{20} = \\dfrac{2}{5}$.` })
+                 corrige: `$\\dfrac{8}{20} = \\dfrac{2}{5}$.` }),
+        () => ({ enonce: `Dans un paquet de $24$ bonbons, $6$ sont au caramel. Quelle est la proportion de bonbons au caramel (fraction irréductible) ?`,
+                 corrige: `$\\dfrac{6}{24} = \\dfrac{1}{4}$.` }),
+        () => ({ enonce: `Sur $15$ joueurs d'une équipe, $9$ sont titulaires. Quelle est la proportion de titulaires (fraction irréductible) ?`,
+                 corrige: `$\\dfrac{9}{15} = \\dfrac{3}{5}$.` })
       ];
       return pick(variantes)();
     } else if (d === 2) {
@@ -4138,7 +4234,11 @@ const generateurs = {
         () => ({ enonce: `Dans un panier de $32$ légumes : $8$ courgettes, $4$ poireaux, $6$ artichauts, $14$ pommes de terre. Quelle est la proportion de courgettes ?`,
                  corrige: `$\\dfrac{8}{32} = \\dfrac{1}{4}$.` }),
         () => ({ enonce: `Dans une classe de $30$ élèves, $18$ font une langue vivante 2. Donner la proportion sous forme de fraction irréductible.`,
-                 corrige: `$\\dfrac{18}{30} = \\dfrac{3}{5}$.` })
+                 corrige: `$\\dfrac{18}{30} = \\dfrac{3}{5}$.` }),
+        () => ({ enonce: `Une bibliothèque contient $48$ livres : $36$ romans et le reste des essais. Quelle est la proportion d'essais (fraction irréductible) ?`,
+                 corrige: `Nombre d'essais : $48 - 36 = 12$. Proportion : $\\dfrac{12}{48} = \\dfrac{1}{4}$.` }),
+        () => ({ enonce: `Sur $42$ élèves de Terminale, $28$ ont choisi maths spécialité. Quelle est la proportion (fraction irréductible) ?`,
+                 corrige: `$\\dfrac{28}{42} = \\dfrac{2}{3}$.` })
       ];
       return pick(variantes)();
     } else {
@@ -4146,7 +4246,9 @@ const generateurs = {
         () => ({ enonce: `Un quart des élèves d'un lycée est en seconde, $\\dfrac{1}{3}$ en première, le reste en terminale. Quelle proportion d'élèves est en terminale ?`,
                  corrige: `Proportion en terminale : $1 - \\dfrac{1}{4} - \\dfrac{1}{3} = \\dfrac{12 - 3 - 4}{12} = \\dfrac{5}{12}$.` }),
         () => ({ enonce: `Une famille consomme $\\dfrac{2}{5}$ de son budget en logement et $\\dfrac{1}{4}$ en alimentation. Quelle proportion reste-t-il pour le reste ?`,
-                 corrige: `Reste : $1 - \\dfrac{2}{5} - \\dfrac{1}{4} = \\dfrac{20 - 8 - 5}{20} = \\dfrac{7}{20}$.` })
+                 corrige: `Reste : $1 - \\dfrac{2}{5} - \\dfrac{1}{4} = \\dfrac{20 - 8 - 5}{20} = \\dfrac{7}{20}$.` }),
+        () => ({ enonce: `Dans une école, $\\dfrac{3}{8}$ des élèves font de l'allemand et $\\dfrac{1}{6}$ font du chinois. Quelle proportion ne fait ni l'un ni l'autre ?`,
+                 corrige: `Proportion : $1 - \\dfrac{3}{8} - \\dfrac{1}{6} = \\dfrac{24 - 9 - 4}{24} = \\dfrac{11}{24}$.` })
       ];
       return pick(variantes)();
     }
@@ -4175,7 +4277,11 @@ const generateurs = {
         () => ({ enonce: `Un pot de confiture pèse $400$ g et contient $45\\,\\%$ de fruits. Quelle est la masse de fruits ?`,
                  corrige: `Masse de fruits : $0{,}45 \\times 400 = 180$ g.` }),
         () => ({ enonce: `Dans un lycée, le quart des élèves sont internes ; parmi eux, la moitié sont des filles. Si le lycée compte $800$ élèves, combien de filles internes y a-t-il ?`,
-                 corrige: `Filles internes : $\\dfrac{1}{2} \\times \\dfrac{1}{4} \\times 800 = \\dfrac{1}{8} \\times 800 = 100$ filles.` })
+                 corrige: `Filles internes : $\\dfrac{1}{2} \\times \\dfrac{1}{4} \\times 800 = \\dfrac{1}{8} \\times 800 = 100$ filles.` }),
+        () => ({ enonce: `Sur $1200$ habitants d'un village, $35\\,\\%$ ont plus de $60$ ans. Combien d'habitants ont plus de $60$ ans ?`,
+                 corrige: `Nombre : $0{,}35 \\times 1200 = 420$ habitants.` }),
+        () => ({ enonce: `Un magasin offre $15\\,\\%$ de réduction sur un produit à $80$ €. Quel est le montant de la réduction ?`,
+                 corrige: `Réduction : $0{,}15 \\times 80 = 12$ €.` })
       ];
       return pick(variantes)();
     }
@@ -4209,7 +4315,11 @@ const generateurs = {
         () => ({ enonce: `Une réduction de $18$ € correspond à $12\\,\\%$ du prix d'un article. Quel est le prix initial de l'article ?`,
                  corrige: `Prix initial : $\\dfrac{18}{0{,}12} = 150$ €.` }),
         () => ({ enonce: `Dans une association, $7{,}5\\,\\%$ des adhérents (soit $60$ personnes) sont bénévoles. Combien y a-t-il d'adhérents au total ?`,
-                 corrige: `Total : $\\dfrac{60}{0{,}075} = 800$ adhérents.` })
+                 corrige: `Total : $\\dfrac{60}{0{,}075} = 800$ adhérents.` }),
+        () => ({ enonce: `Un commerçant verse $35$ € de TVA sur un produit, ce qui représente $20\\,\\%$ du prix HT. Quel est le prix HT ?`,
+                 corrige: `Prix HT : $\\dfrac{35}{0{,}20} = 175$ €.` }),
+        () => ({ enonce: `Une remise de $24$ € correspond à $8\\,\\%$ du prix initial d'un produit. Quel était le prix initial ?`,
+                 corrige: `Prix initial : $\\dfrac{24}{0{,}08} = 300$ €.` })
       ];
       return pick(variantes)();
     }
@@ -4870,10 +4980,9 @@ const generateurs = {
       };
     } else {
       // Difficile : deux courbes f et g, résoudre f(x) < g(x)
-      // f droite, g parabole : on construit une parabole et une droite qui se coupent en 2 points entiers
       const variantes = [
         () => {
-          // f(x) = 0 (axe x), g(x) = x² - 4 : g < 0 sur ]-2, 2[
+          // f(x) = 0 (axe x), g(x) = x² - 3
           const r = creerRepere({});
           let svg = r.svg + tracerDroite(r, 0, 0, { label: 'C_f' });
           svg += tracerParabole(r, 1, 0, -3, { label: 'C_g', couleur: '#8b6914' });
@@ -4882,6 +4991,30 @@ const generateurs = {
             enonce: `Le graphique ci-contre montre les courbes de deux fonctions $f$ et $g$. Résoudre graphiquement $g(x) < f(x)$.`,
             svg: svg,
             corrige: `$g(x) < f(x)$ là où $\\mathcal{C}_g$ est sous $\\mathcal{C}_f$ : $\\mathcal{S} = ]-\\sqrt{3}\\,;\\,\\sqrt{3}[$, soit visuellement environ $]-1{,}7\\,;\\,1{,}7[$.`
+          };
+        },
+        () => {
+          // f droite x+1, g parabole x²-2 : intersection en x=-1 et x=3
+          const r = creerRepere({});
+          let svg = r.svg + tracerDroite(r, 1, 1, { label: 'C_f' });
+          svg += tracerParabole(r, 1, 0, -2, { label: 'C_g', couleur: '#8b6914' });
+          svg += r.fermer();
+          return {
+            enonce: `Le graphique ci-contre montre les courbes de $f(x) = x + 1$ (droite) et $g(x) = x^2 - 2$ (parabole). Résoudre graphiquement $f(x) > g(x)$.`,
+            svg: svg,
+            corrige: `$f(x) > g(x)$ là où la droite est au-dessus de la parabole. Les courbes se coupent en $x = -1$ et $x = 3$. $\\mathcal{S} = ]-1\\,;\\,3[$.`
+          };
+        },
+        () => {
+          // f droite -x+2, g parabole x²-2
+          const r = creerRepere({});
+          let svg = r.svg + tracerDroite(r, -1, 2, { label: 'C_f' });
+          svg += tracerParabole(r, 1, 0, -2, { label: 'C_g', couleur: '#8b6914' });
+          svg += r.fermer();
+          return {
+            enonce: `Le graphique ci-contre montre les courbes de $f$ (droite) et $g$ (parabole). Résoudre graphiquement $g(x) \\le f(x)$.`,
+            svg: svg,
+            corrige: `$g(x) \\le f(x)$ là où $\\mathcal{C}_g$ est sous (ou sur) $\\mathcal{C}_f$. Les courbes se coupent en $x = -2$ et $x = 2$. $\\mathcal{S} = [-2\\,;\\,2]$.`
           };
         }
       ];
@@ -5118,19 +5251,37 @@ const generateurs = {
       const ya = rand(-5, 5); const yb = rand(-5, 5);
       const m = (yb - ya) / (xb - xa);
       const mAff = Number.isInteger(m) ? `${m}` : `\\dfrac{${yb - ya}}{${xb - xa}}`;
+      const xaAff = xa < 0 ? `(${xa})` : `${xa}`;
+      const yaAff = ya < 0 ? `(${ya})` : `${ya}`;
       return {
         enonce: `Calculer le coefficient directeur de la droite passant par $A(${xa}\\,;\\,${ya})$ et $B(${xb}\\,;\\,${yb})$.`,
-        corrige: `$m = \\dfrac{y_B - y_A}{x_B - x_A} = \\dfrac{${yb} - (${ya})}{${xb} - (${xa})} = \\dfrac{${yb - ya}}{${xb - xa}} = ${mAff}$.`
+        corrige: `$m = \\dfrac{y_B - y_A}{x_B - x_A} = \\dfrac{${yb} - ${yaAff}}{${xb} - ${xaAff}} = \\dfrac{${yb - ya}}{${xb - xa}} = ${mAff}$.`
       };
     } else if (d === 2) {
+      // Moyen : valeurs plus grandes, pente entière garantie
+      const m = pick([2, 3, 4, 5, -2, -3]);
+      const xa = pick([1, 2, 3, 5, 10]);
+      const dx = pick([2, 3, 4, 5]);
+      const xb = xa + dx;
+      const ya = pick([50, 100, 150, 200]);
+      const yb = ya + m * dx;
       return {
-        enonce: `Dans un repère, on considère les points $A(1\\,;\\,100)$ et $B(4\\,;\\,106)$. Calculer le coefficient directeur de la droite $(AB)$.`,
-        corrige: `$m = \\dfrac{106 - 100}{4 - 1} = \\dfrac{6}{3} = 2$.`
+        enonce: `Dans un repère, on considère les points $A(${xa}\\,;\\,${ya})$ et $B(${xb}\\,;\\,${yb})$. Calculer le coefficient directeur de la droite $(AB)$.`,
+        corrige: `$m = \\dfrac{${yb} - ${ya}}{${xb} - ${xa}} = \\dfrac{${yb - ya}}{${dx}} = ${m}$.`
       };
     } else {
+      // Difficile : pente entière, mais nombres plus grands ou pente négative
+      const m = pick([-5, -4, -3, -2, 2, 3, 4, 5]);
+      const xa = pick([10, 20, 30, 50]);
+      const dx = pick([5, 10, 15, 20]);
+      const xb = xa + dx;
+      const ya = pick([100, 150, 200, 250, 300]);
+      const yb = ya + m * dx;
+      const dy = yb - ya;
+      const dyAff = dy < 0 ? `${dy}` : `${dy}`;
       return {
-        enonce: `Dans un repère, on considère les points $C(20\\,;\\,300)$ et $D(30\\,;\\,250)$. Calculer le coefficient directeur de la droite $(CD)$.`,
-        corrige: `$m = \\dfrac{250 - 300}{30 - 20} = \\dfrac{-50}{10} = -5$.`
+        enonce: `Dans un repère, on considère les points $C(${xa}\\,;\\,${ya})$ et $D(${xb}\\,;\\,${yb})$. Calculer le coefficient directeur de la droite $(CD)$.`,
+        corrige: `$m = \\dfrac{${yb} - ${ya}}{${xb} - ${xa}} = \\dfrac{${dyAff}}{${dx}} = ${m}$.`
       };
     }
   },
@@ -5172,29 +5323,50 @@ const generateurs = {
   // ST02.2 — Moyenne pondérée
   st02_moy_pond: (d) => {
     if (d === 1) {
+      // Facile : 3 notes avec coef simples, on calcule la moyenne
+      const notes = [rand(8, 18), rand(8, 18), rand(8, 18)];
+      const coefs = [pick([1, 2, 3]), 1, 1];
+      const totCoef = coefs.reduce((s, c) => s + c, 0);
+      const totProd = notes.reduce((s, n, i) => s + n * coefs[i], 0);
+      const moy = totProd / totCoef;
+      const moyAff = Number.isInteger(moy) ? `${moy}` : moy.toFixed(2).replace('.', '{,}');
       return {
-        enonce: `Un élève a obtenu : $14$ (coef. $2$), $10$ (coef. $1$), $16$ (coef. $1$). Quelle est sa moyenne ?`,
-        corrige: `Moyenne : $\\dfrac{14 \\times 2 + 10 \\times 1 + 16 \\times 1}{2 + 1 + 1} = \\dfrac{28 + 10 + 16}{4} = \\dfrac{54}{4} = 13{,}5$.`
+        enonce: `Un élève a obtenu : $${notes[0]}$ (coef. $${coefs[0]}$), $${notes[1]}$ (coef. $${coefs[1]}$), $${notes[2]}$ (coef. $${coefs[2]}$). Quelle est sa moyenne ?`,
+        corrige: `Moyenne : $\\dfrac{${notes[0]} \\times ${coefs[0]} + ${notes[1]} \\times ${coefs[1]} + ${notes[2]} \\times ${coefs[2]}}{${totCoef}} = \\dfrac{${totProd}}{${totCoef}} = ${moyAff}$.`
       };
     } else if (d === 2) {
-      const variantes = [
-        () => ({ enonce: `Voici les notes : $10$ (coef. $1$), $13$ (coef. $1$), $12$ (coef. $1$), $x$ (coef. $2$). Quelle doit être la valeur de $x$ pour que la moyenne soit $15$ ?`,
-                 corrige: `$\\dfrac{10 + 13 + 12 + 2x}{5} = 15$. Donc $35 + 2x = 75$, soit $x = 20$. La valeur est $20$ (limite admissible !).` }),
-        () => {
-          const notes = [rand(5, 15), rand(5, 15), rand(5, 15)];
-          const coefs = [rand(1, 3), rand(1, 3), rand(1, 3)];
-          const totCoef = coefs.reduce((s, c) => s + c, 0);
-          const totProd = notes.reduce((s, n, i) => s + n * coefs[i], 0);
-          const moy = totProd / totCoef;
-          return { enonce: `Notes : $${notes[0]}$ (coef. $${coefs[0]}$), $${notes[1]}$ (coef. $${coefs[1]}$), $${notes[2]}$ (coef. $${coefs[2]}$). Calculer la moyenne.`,
-                   corrige: `Moyenne : $\\dfrac{${notes[0]} \\times ${coefs[0]} + ${notes[1]} \\times ${coefs[1]} + ${notes[2]} \\times ${coefs[2]}}{${totCoef}} = \\dfrac{${totProd}}{${totCoef}} \\approx ${moy.toFixed(2).replace('.', ',')}$.` };
-        }
-      ];
-      return pick(variantes)();
-    } else {
+      // Moyen : moyenne avec 3 notes et coefs variables
+      const notes = [rand(5, 18), rand(5, 18), rand(5, 18)];
+      const coefs = [rand(1, 3), rand(1, 3), rand(1, 3)];
+      const totCoef = coefs.reduce((s, c) => s + c, 0);
+      const totProd = notes.reduce((s, n, i) => s + n * coefs[i], 0);
+      const moy = totProd / totCoef;
+      const estEntier = Number.isInteger(moy);
+      const moyAff = estEntier ? `${moy}` : moy.toFixed(2).replace('.', '{,}');
       return {
-        enonce: `Voici une série : note $10$ (coef. $1$), note $8$ (coef. $2$), note $16$ (coef. $x$). On note $m$ la moyenne. Quelle doit être la valeur de $x$ pour que $m = 15$ ?`,
-        corrige: `$\\dfrac{10 + 16 + 16x}{3 + x} = 15$ donc $26 + 16x = 45 + 15x$, soit $x = 19$.`
+        enonce: `Notes : $${notes[0]}$ (coef. $${coefs[0]}$), $${notes[1]}$ (coef. $${coefs[1]}$), $${notes[2]}$ (coef. $${coefs[2]}$). Calculer la moyenne.`,
+        corrige: `Moyenne : $\\dfrac{${notes[0]} \\times ${coefs[0]} + ${notes[1]} \\times ${coefs[1]} + ${notes[2]} \\times ${coefs[2]}}{${totCoef}} = \\dfrac{${totProd}}{${totCoef}} ${estEntier ? '=' : '\\approx'} ${moyAff}$.`
+      };
+    } else {
+      // Difficile : trouver la valeur manquante pour atteindre une moyenne donnée
+      const n1 = rand(8, 16), n2 = rand(8, 16);
+      const c1 = pick([1, 2]), c2 = pick([1, 2]);
+      const cX = pick([2, 3]);
+      const mCible = pick([12, 13, 14, 15]);
+      // (n1*c1 + n2*c2 + x*cX) / (c1+c2+cX) = mCible
+      // x = (mCible*(c1+c2+cX) - n1*c1 - n2*c2) / cX
+      const numerateur = mCible * (c1 + c2 + cX) - n1*c1 - n2*c2;
+      if (numerateur % cX !== 0 || numerateur / cX < 0 || numerateur / cX > 20) {
+        // fallback simple
+        return {
+          enonce: `Voici une série : note $10$ (coef. $1$), note $8$ (coef. $2$), note $x$ (coef. $3$). Quelle doit être la valeur de $x$ pour que la moyenne soit $13$ ?`,
+          corrige: `$\\dfrac{10 + 16 + 3x}{6} = 13$, soit $26 + 3x = 78$, donc $x = \\dfrac{52}{3} \\approx 17{,}3$.`
+        };
+      }
+      const x = numerateur / cX;
+      return {
+        enonce: `Voici une série de notes : $${n1}$ (coef. $${c1}$), $${n2}$ (coef. $${c2}$), $x$ (coef. $${cX}$). Quelle doit être la valeur de $x$ pour que la moyenne soit $${mCible}$ ?`,
+        corrige: `On résout : $\\dfrac{${n1} \\times ${c1} + ${n2} \\times ${c2} + ${cX}x}{${c1+c2+cX}} = ${mCible}$. Cela donne $${n1*c1 + n2*c2} + ${cX}x = ${mCible*(c1+c2+cX)}$, soit $${cX}x = ${numerateur}$, donc $x = ${x}$.`
       };
     }
   },
@@ -5202,41 +5374,107 @@ const generateurs = {
   // ST02.3 — Médiane
   st02_med: (d) => {
     if (d === 1) {
-      const valeurs = [3, 7, 5, 9, 6, 8, 4].sort((a, b) => a - b);
+      // Facile : série impaire, médiane = valeur centrale
+      const n = 7;
+      const valeurs = [];
+      while (valeurs.length < n) {
+        const v = rand(1, 20);
+        if (!valeurs.includes(v)) valeurs.push(v);
+      }
+      const tries = [...valeurs].sort((a, b) => a - b);
+      const valeursMelang = [...valeurs].sort(() => Math.random() - 0.5);
       return {
-        enonce: `Calculer la médiane de la série : $3\\,;\\,7\\,;\\,5\\,;\\,9\\,;\\,6\\,;\\,8\\,;\\,4$.`,
-        corrige: `On range : $${valeurs.join('\\,;\\,')}$. Avec $7$ valeurs, la médiane est la $4^e$ valeur : $${valeurs[3]}$.`
+        enonce: `Calculer la médiane de la série : $${valeursMelang.join('\\,;\\,')}$.`,
+        corrige: `On range : $${tries.join('\\,;\\,')}$. Avec $${n}$ valeurs (impair), la médiane est la $${(n+1)/2}^e$ valeur : $${tries[(n-1)/2]}$.`
       };
     } else if (d === 2) {
+      // Moyen : série paire, médiane = moyenne des 2 centrales
+      const n = 6;
+      const valeurs = [];
+      while (valeurs.length < n) {
+        const v = rand(1, 20);
+        if (!valeurs.includes(v)) valeurs.push(v);
+      }
+      valeurs.sort((a, b) => a - b);
+      const v1 = valeurs[n/2 - 1];
+      const v2 = valeurs[n/2];
+      const med = (v1 + v2) / 2;
+      const medAff = Number.isInteger(med) ? `${med}` : med.toFixed(1).replace('.', '{,}');
       return {
-        enonce: `Voici une série rangée : $2\\,;\\,5\\,;\\,7\\,;\\,8\\,;\\,10\\,;\\,12$. Quelle est sa médiane ?`,
-        corrige: `Avec $6$ valeurs (pair), la médiane est la moyenne des $3^e$ et $4^e$ valeurs : $\\dfrac{7 + 8}{2} = 7{,}5$.`
+        enonce: `Voici une série rangée : $${valeurs.join('\\,;\\,')}$. Quelle est sa médiane ?`,
+        corrige: `Avec $${n}$ valeurs (pair), la médiane est la moyenne des $${n/2}^e$ et $${n/2+1}^e$ valeurs : $\\dfrac{${v1} + ${v2}}{2} = ${medAff}$.`
       };
     } else {
-      return {
-        enonce: `Considérer les deux séries A : $1\\,;\\,2\\,;\\,3$ et B : $0{,}5\\,;\\,2\\,;\\,100$. Comparer leur moyenne et leur médiane.`,
-        corrige: `Moyenne A : $\\dfrac{1+2+3}{3} = 2$. Médiane A : $2$. Moyenne B : $\\dfrac{0{,}5+2+100}{3} \\approx 34{,}17$. Médiane B : $2$. Les deux séries ont la **même médiane** ($2$) mais des **moyennes différentes**.`
-      };
+      // Difficile : comparer moyenne et médiane sur deux séries
+      const variantes = [
+        () => ({
+          enonce: `Considérer les deux séries A : $1\\,;\\,2\\,;\\,3$ et B : $0{,}5\\,;\\,2\\,;\\,100$. Comparer leur moyenne et leur médiane.`,
+          corrige: `Moyenne A : $\\dfrac{1+2+3}{3} = 2$. Médiane A : $2$. Moyenne B : $\\dfrac{0{,}5+2+100}{3} \\approx 34{,}17$. Médiane B : $2$. Les deux séries ont la **même médiane** ($2$) mais des **moyennes très différentes** : la moyenne est sensible aux valeurs extrêmes.`
+        }),
+        () => ({
+          enonce: `Considérer les deux séries C : $5\\,;\\,6\\,;\\,7\\,;\\,8\\,;\\,9$ et D : $1\\,;\\,6\\,;\\,7\\,;\\,8\\,;\\,13$. Comparer leur moyenne et leur médiane.`,
+          corrige: `Moyenne C : $\\dfrac{35}{5} = 7$. Médiane C : $7$. Moyenne D : $\\dfrac{35}{5} = 7$. Médiane D : $7$. Les deux séries ont les **mêmes moyenne et médiane**, mais leurs dispersions diffèrent (D plus étalée).`
+        }),
+        () => ({
+          enonce: `Une série de $5$ valeurs a pour moyenne $10$ et médiane $8$. Que peut-on en déduire sur la distribution ?`,
+          corrige: `La moyenne ($10$) est supérieure à la médiane ($8$), ce qui suggère que quelques valeurs élevées tirent la moyenne vers le haut. La distribution est asymétrique à droite.`
+        })
+      ];
+      return pick(variantes)();
     }
   },
 
   // ST02.4 — Quartiles
   st02_quart: (d) => {
     if (d === 1) {
+      // Facile : série rangée de 8 valeurs, on demande Q1 et Q3
+      const n = 8;
+      const valeurs = [];
+      while (valeurs.length < n) {
+        const v = rand(1, 20);
+        if (!valeurs.includes(v)) valeurs.push(v);
+      }
+      valeurs.sort((a, b) => a - b);
+      const q1 = valeurs[1]; // 2e valeur (rang ceil(8/4)=2)
+      const q3 = valeurs[5]; // 6e valeur (rang ceil(24/4)=6)
       return {
-        enonce: `Voici une série rangée : $4\\,;\\,5\\,;\\,7\\,;\\,8\\,;\\,9\\,;\\,11\\,;\\,12\\,;\\,15$. Déterminer $Q_1$ (premier quartile) et $Q_3$ (troisième quartile).`,
-        corrige: `$Q_1$ est la $\\lceil 8/4 \\rceil = 2^e$ valeur : $Q_1 = 5$. $Q_3$ est la $\\lceil 3 \\times 8/4 \\rceil = 6^e$ valeur : $Q_3 = 11$.`
+        enonce: `Voici une série rangée : $${valeurs.join('\\,;\\,')}$. Déterminer $Q_1$ (premier quartile) et $Q_3$ (troisième quartile).`,
+        corrige: `$Q_1$ est la $\\lceil ${n}/4 \\rceil = 2^e$ valeur : $Q_1 = ${q1}$. $Q_3$ est la $\\lceil 3 \\times ${n}/4 \\rceil = 6^e$ valeur : $Q_3 = ${q3}$.`
       };
     } else if (d === 2) {
+      // Moyen : série de 12 valeurs, médiane + Q1 + Q3
+      const n = 12;
+      const valeurs = [];
+      while (valeurs.length < n) {
+        const v = rand(1, 25);
+        if (!valeurs.includes(v)) valeurs.push(v);
+      }
+      valeurs.sort((a, b) => a - b);
+      const med = (valeurs[5] + valeurs[6]) / 2;
+      const q1 = valeurs[2]; // ceil(12/4)=3, 3e valeur
+      const q3 = valeurs[8]; // ceil(36/4)=9, 9e valeur
+      const medAff = Number.isInteger(med) ? `${med}` : med.toFixed(1).replace('.', '{,}');
       return {
-        enonce: `Voici une série rangée : $1\\,;\\,3\\,;\\,4\\,;\\,5\\,;\\,6\\,;\\,7\\,;\\,9\\,;\\,10\\,;\\,12\\,;\\,15\\,;\\,18\\,;\\,20$. Déterminer la médiane, $Q_1$ et $Q_3$.`,
-        corrige: `Avec $12$ valeurs : médiane $= \\dfrac{7 + 9}{2} = 8$. $Q_1$ est la $\\lceil 12/4 \\rceil = 3^e$ valeur, soit $4$. $Q_3$ est la $\\lceil 3 \\times 12/4 \\rceil = 9^e$ valeur, soit $12$.`
+        enonce: `Voici une série rangée : $${valeurs.join('\\,;\\,')}$. Déterminer la médiane, $Q_1$ et $Q_3$.`,
+        corrige: `Avec $12$ valeurs (pair) : médiane $= \\dfrac{${valeurs[5]} + ${valeurs[6]}}{2} = ${medAff}$. $Q_1$ est la $\\lceil 12/4 \\rceil = 3^e$ valeur, soit $${q1}$. $Q_3$ est la $\\lceil 3 \\times 12/4 \\rceil = 9^e$ valeur, soit $${q3}$.`
       };
     } else {
-      return {
-        enonce: `Deux séries A : $9\\,;\\,10\\,;\\,10\\,;\\,11$ et B : $7\\,;\\,10\\,;\\,10\\,;\\,13$. Comparer la moyenne et l'écart-type (qualitatif).`,
-        corrige: `Moyenne A $= \\dfrac{40}{4} = 10$, moyenne B $= \\dfrac{40}{4} = 10$. Les valeurs de B sont plus dispersées autour de $10$, donc l'écart-type de B est plus grand que celui de A.`
-      };
+      // Difficile : comparer la dispersion de deux séries
+      const variantes = [
+        () => ({
+          enonce: `Deux séries A : $9\\,;\\,10\\,;\\,10\\,;\\,11$ et B : $7\\,;\\,10\\,;\\,10\\,;\\,13$. Comparer la moyenne et l'écart-type (qualitatif).`,
+          corrige: `Moyenne A $= \\dfrac{40}{4} = 10$, moyenne B $= \\dfrac{40}{4} = 10$. Les valeurs de B sont plus dispersées autour de $10$, donc l'écart-type de B est plus grand que celui de A.`
+        }),
+        () => ({
+          enonce: `Deux séries C : $4\\,;\\,5\\,;\\,5\\,;\\,6$ et D : $3\\,;\\,5\\,;\\,5\\,;\\,7$. Comparer leur moyenne et leur étendue.`,
+          corrige: `Les deux moyennes valent $5$. Étendue C : $6 - 4 = 2$. Étendue D : $7 - 3 = 4$. La série D est plus dispersée.`
+        }),
+        () => ({
+          enonce: `Une série a pour quartiles : $Q_1 = 8$, médiane $= 12$, $Q_3 = 16$. Quelle est l'écart interquartile $Q_3 - Q_1$ ?`,
+          corrige: `Écart interquartile : $Q_3 - Q_1 = 16 - 8 = 8$. 50 % des valeurs sont comprises entre $8$ et $16$.`
+        })
+      ];
+      return pick(variantes)();
     }
   },
 
@@ -5317,7 +5555,11 @@ const generateurs = {
         () => ({ enonce: `On lance deux pièces équilibrées simultanément. Quelle est la probabilité que les deux pièces tombent du même côté ?`,
                  corrige: `Issues : $\\{PP, PF, FP, FF\\}$, $4$ équiprobables. Favorables : $\\{PP, FF\\}$, soit $2$. $P = \\dfrac{2}{4} = \\dfrac{1}{2}$.` }),
         () => ({ enonce: `Dans un jeu de $32$ cartes, quelle est la probabilité d'obtenir un As ou un Pique ?`,
-                 corrige: `As : $4$, Piques : $8$, As de Pique compté deux fois : $1$. Total : $4 + 8 - 1 = 11$. $P = \\dfrac{11}{32}$.` })
+                 corrige: `As : $4$, Piques : $8$, As de Pique compté deux fois : $1$. Total : $4 + 8 - 1 = 11$. $P = \\dfrac{11}{32}$.` }),
+        () => ({ enonce: `On lance deux dés équilibrés à $6$ faces. Quelle est la probabilité que la somme des deux dés soit égale à $7$ ?`,
+                 corrige: `Il y a $36$ issues équiprobables. Sommes égales à $7$ : $\\{(1,6), (2,5), (3,4), (4,3), (5,2), (6,1)\\}$, soit $6$ issues. $P = \\dfrac{6}{36} = \\dfrac{1}{6}$.` }),
+        () => ({ enonce: `Dans une urne, $5$ jetons numérotés de $1$ à $5$. On en tire $2$ simultanément. Quelle est la probabilité d'obtenir $2$ jetons de somme paire ?`,
+                 corrige: `$\\binom{5}{2} = 10$ tirages possibles. Somme paire : pair+pair ou impair+impair. Pairs : $\\{2,4\\}$ → $\\binom{2}{2}=1$. Impairs : $\\{1,3,5\\}$ → $\\binom{3}{2}=3$. Total favorables : $4$. $P = \\dfrac{4}{10} = \\dfrac{2}{5}$.` })
       ];
       return pick(variantes)();
     }
@@ -5341,34 +5583,125 @@ const generateurs = {
         () => ({ enonce: `Dans un jeu de $32$ cartes, quelle est la probabilité de ne pas tirer un cœur ?`,
                  corrige: `$P(\\text{cœur}) = \\dfrac{8}{32} = \\dfrac{1}{4}$. Donc $P(\\text{pas cœur}) = 1 - \\dfrac{1}{4} = \\dfrac{3}{4}$.` }),
         () => ({ enonce: `On lance deux dés à $6$ faces. La probabilité d'obtenir un double $6$ est $\\dfrac{1}{36}$. Quelle est la probabilité de **ne pas** obtenir un double $6$ ?`,
-                 corrige: `$P = 1 - \\dfrac{1}{36} = \\dfrac{35}{36}$.` })
+                 corrige: `$P = 1 - \\dfrac{1}{36} = \\dfrac{35}{36}$.` }),
+        () => ({ enonce: `Dans un jeu de $52$ cartes, on tire une carte. Quelle est la probabilité de **ne pas** obtenir une figure (valet, dame, roi) ?`,
+                 corrige: `$P(\\text{figure}) = \\dfrac{12}{52} = \\dfrac{3}{13}$. Donc $P(\\text{pas figure}) = 1 - \\dfrac{3}{13} = \\dfrac{10}{13}$.` }),
+        () => ({ enonce: `Une urne contient $7$ boules : $3$ rouges et $4$ bleues. On tire une boule au hasard. Quelle est la probabilité de **ne pas** tirer une boule rouge ?`,
+                 corrige: `$P(\\text{rouge}) = \\dfrac{3}{7}$. Donc $P(\\text{pas rouge}) = 1 - \\dfrac{3}{7} = \\dfrac{4}{7}$.` })
       ];
       return pick(variantes)();
     } else {
-      return {
-        enonce: `Dans une urne, $P(\\text{rouge}) = \\dfrac{2}{5}$ et $P(\\text{bleu}) = \\dfrac{1}{3}$. Quelle est la probabilité de tirer une boule ni rouge ni bleue ?`,
-        corrige: `$P(\\text{rouge ou bleu}) = \\dfrac{2}{5} + \\dfrac{1}{3} = \\dfrac{6 + 5}{15} = \\dfrac{11}{15}$. Donc $P(\\text{ni rouge ni bleu}) = 1 - \\dfrac{11}{15} = \\dfrac{4}{15}$.`
-      };
+      const variantes = [
+        () => ({
+          enonce: `Dans une urne, $P(\\text{rouge}) = \\dfrac{2}{5}$ et $P(\\text{bleu}) = \\dfrac{1}{3}$. Quelle est la probabilité de tirer une boule ni rouge ni bleue ?`,
+          corrige: `$P(\\text{rouge ou bleu}) = \\dfrac{2}{5} + \\dfrac{1}{3} = \\dfrac{6 + 5}{15} = \\dfrac{11}{15}$. Donc $P(\\text{ni rouge ni bleu}) = 1 - \\dfrac{11}{15} = \\dfrac{4}{15}$.`
+        }),
+        () => ({
+          enonce: `Dans un jeu de $52$ cartes, on tire une carte au hasard. Quelle est la probabilité que la carte ne soit ni un roi ni un cœur ?`,
+          corrige: `$P(\\text{roi}) = \\dfrac{4}{52}$, $P(\\text{cœur}) = \\dfrac{13}{52}$, $P(\\text{roi de cœur}) = \\dfrac{1}{52}$. Donc $P(\\text{roi ou cœur}) = \\dfrac{4 + 13 - 1}{52} = \\dfrac{16}{52}$. Et $P(\\text{ni roi ni cœur}) = 1 - \\dfrac{16}{52} = \\dfrac{36}{52} = \\dfrac{9}{13}$.`
+        }),
+        () => {
+          const a = pick([2, 3, 4]); const b = pick([5, 6, 7]); const denom = pick([12, 15, 20]);
+          // P(A) = a/denom, P(B) = b/denom, événements disjoints
+          if (a + b >= denom) return null;
+          return {
+            enonce: `Dans une urne, $P(A) = \\dfrac{${a}}{${denom}}$ et $P(B) = \\dfrac{${b}}{${denom}}$, avec $A$ et $B$ incompatibles. Quelle est la probabilité de l'événement contraire de $A \\cup B$ ?`,
+            corrige: `$P(A \\cup B) = P(A) + P(B) = \\dfrac{${a}}{${denom}} + \\dfrac{${b}}{${denom}} = \\dfrac{${a+b}}{${denom}}$. Donc $P(\\overline{A \\cup B}) = 1 - \\dfrac{${a+b}}{${denom}} = \\dfrac{${denom - a - b}}{${denom}}$.`
+          };
+        }
+      ];
+      let res = null, tries = 0;
+      while (!res && tries < 5) { res = pick(variantes)(); tries++; }
+      return res || { enonce: 'Calculer 1 - 0,3.', corrige: '$1 - 0{,}3 = 0{,}7$.' };
     }
   },
 
   // PR03.1 — Probabilité comme somme des probabilités d'issues
   pr03_somme: (d) => {
     if (d === 1) {
-      return {
-        enonce: `On lance un dé truqué à $4$ faces. Les probabilités sont $P(1) = 0{,}5$, $P(2) = \\dfrac{1}{6}$, $P(3) = 0{,}2$. Quelle est $P(4)$ ?`,
-        corrige: `La somme des probabilités vaut $1$. $P(4) = 1 - 0{,}5 - \\dfrac{1}{6} - 0{,}2 = \\dfrac{3 - 1 - \\frac{1}{3}}{...} = \\dfrac{2}{15}$.`
-      };
+      // Facile : 4 issues, on connaît 3 probabilités, on cherche la 4e
+      const variantes = [
+        () => {
+          // Probabilités sous forme décimale
+          const p1 = pick([0.2, 0.3, 0.4]);
+          const p2 = pick([0.1, 0.2, 0.3]);
+          const p3 = pick([0.1, 0.15, 0.2]);
+          const p4 = 1 - p1 - p2 - p3;
+          if (p4 <= 0 || p4 >= 1) return null;
+          const fmt = (v) => v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '').replace('.', '{,}');
+          return {
+            enonce: `On tire un objet parmi $4$ catégories A, B, C, D. On a $P(A) = ${fmt(p1)}$, $P(B) = ${fmt(p2)}$, $P(C) = ${fmt(p3)}$. Calculer $P(D)$.`,
+            corrige: `La somme des probabilités vaut $1$. Donc $P(D) = 1 - ${fmt(p1)} - ${fmt(p2)} - ${fmt(p3)} = ${fmt(p4)}$.`
+          };
+        },
+        () => {
+          // Probabilités sous forme de fractions de dénominateur 10
+          const d = 10;
+          const p1 = rand(1, 4), p2 = rand(1, 3), p3 = rand(1, 3);
+          const p4 = d - p1 - p2 - p3;
+          if (p4 <= 0) return null;
+          return {
+            enonce: `Un dé truqué à $4$ faces a des probabilités $P(1) = \\dfrac{${p1}}{${d}}$, $P(2) = \\dfrac{${p2}}{${d}}$, $P(3) = \\dfrac{${p3}}{${d}}$. Calculer $P(4)$.`,
+            corrige: `La somme vaut $1$ : $P(4) = 1 - \\dfrac{${p1}}{${d}} - \\dfrac{${p2}}{${d}} - \\dfrac{${p3}}{${d}} = \\dfrac{${d} - ${p1} - ${p2} - ${p3}}{${d}} = \\dfrac{${p4}}{${d}}$.`
+          };
+        }
+      ];
+      let res = null, tries = 0;
+      while (!res && tries < 10) { res = pick(variantes)(); tries++; }
+      return res || { enonce: 'Sur 4 issues, P(A) = 0,2, P(B) = 0,3, P(C) = 0,3. Calculer P(D).', corrige: '$P(D) = 1 - 0{,}2 - 0{,}3 - 0{,}3 = 0{,}2$.' };
     } else if (d === 2) {
-      return {
-        enonce: `On lance une pièce truquée de telle sorte que l'on a $3$ fois plus de chance de tomber sur "pile" que sur "face". Quelle est la probabilité de tomber sur "pile" ?`,
-        corrige: `Soit $P(\\text{face}) = p$, alors $P(\\text{pile}) = 3p$. Or $p + 3p = 1$, donc $p = \\dfrac{1}{4}$ et $P(\\text{pile}) = \\dfrac{3}{4}$.`
-      };
+      // Moyen : pièce ou dé truqué, rapport entre les issues
+      const variantes = [
+        () => {
+          const k = pick([2, 3, 4]);
+          // P(pile) = k * P(face), donc P(face) = 1/(k+1)
+          return {
+            enonce: `On lance une pièce truquée : on a $${k}$ fois plus de chances de tomber sur "pile" que sur "face". Quelle est la probabilité de tomber sur "pile" ?`,
+            corrige: `Soit $P(\\text{face}) = p$. Alors $P(\\text{pile}) = ${k}p$. Or $p + ${k}p = 1$, donc $${k+1}p = 1$, soit $p = \\dfrac{1}{${k+1}}$. Donc $P(\\text{pile}) = \\dfrac{${k}}{${k+1}}$.`
+          };
+        },
+        () => {
+          // Dé truqué à 6 faces : P(6) = k * P(autre face), équiprobables ailleurs
+          const k = pick([2, 3]);
+          // Soit p = P(autres faces), alors 5p + kp = 1, soit p = 1/(5+k)
+          return {
+            enonce: `Un dé à $6$ faces est truqué : la face $6$ a $${k}$ fois plus de chances d'apparaître que chacune des autres faces. Quelle est la probabilité d'obtenir un $6$ ?`,
+            corrige: `Notons $p$ la probabilité commune des faces $1$ à $5$. Alors $P(6) = ${k}p$, et $5p + ${k}p = 1$, soit $${5+k}p = 1$, donc $p = \\dfrac{1}{${5+k}}$. Ainsi $P(6) = \\dfrac{${k}}{${5+k}}$.`
+          };
+        }
+      ];
+      return pick(variantes)();
     } else {
-      return {
-        enonce: `Un dé est truqué : les faces $1, 2, 4, 5$ sont équiprobables. $P(3) = \\dfrac{1}{4}$ et $P(6) = \\dfrac{1}{12}$. Calculer $P(1)$.`,
-        corrige: `Notons $p = P(1) = P(2) = P(4) = P(5)$. Alors $4p + \\dfrac{1}{4} + \\dfrac{1}{12} = 1$, soit $4p = 1 - \\dfrac{3 + 1}{12} = \\dfrac{8}{12} = \\dfrac{2}{3}$, donc $p = \\dfrac{1}{6}$.`
-      };
+      // Difficile : 6 issues, plusieurs équiprobables, on en cherche une
+      const variantes = [
+        () => {
+          // P(3) et P(6) données, faces 1,2,4,5 équiprobables
+          const p3 = { num: 1, den: 4 };
+          const p6 = { num: 1, den: 12 };
+          // 4p + 1/4 + 1/12 = 1, soit 4p = 1 - 4/12 = 8/12 = 2/3, p = 1/6
+          return {
+            enonce: `Un dé à $6$ faces est truqué : les faces $1, 2, 4, 5$ sont équiprobables. On donne $P(3) = \\dfrac{1}{4}$ et $P(6) = \\dfrac{1}{12}$. Calculer $P(1)$.`,
+            corrige: `Notons $p = P(1) = P(2) = P(4) = P(5)$. Alors $4p + \\dfrac{1}{4} + \\dfrac{1}{12} = 1$. Or $\\dfrac{1}{4} + \\dfrac{1}{12} = \\dfrac{3}{12} + \\dfrac{1}{12} = \\dfrac{4}{12} = \\dfrac{1}{3}$. Donc $4p = 1 - \\dfrac{1}{3} = \\dfrac{2}{3}$, soit $p = \\dfrac{1}{6}$.`
+          };
+        },
+        () => {
+          // Roue à 5 secteurs : P(rouge) = 0,2, P(bleu) = 2*P(vert), reste = 0,4
+          // 0,2 + 2p + p + autre = 1 → équation
+          const pVert = pick([0.1, 0.15, 0.2]);
+          const pBleu = 2 * pVert;
+          const pRouge = 0.2;
+          const pAutre = 1 - pVert - pBleu - pRouge;
+          if (pAutre <= 0 || pAutre >= 1) return null;
+          const fmt = (v) => v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '').replace('.', '{,}');
+          return {
+            enonce: `Une roue est divisée en $4$ couleurs : rouge, bleu, vert, jaune. On sait que $P(\\text{rouge}) = ${fmt(pRouge)}$ et que $P(\\text{bleu}) = 2 \\times P(\\text{vert})$. Si $P(\\text{jaune}) = ${fmt(pAutre)}$, calculer $P(\\text{vert})$.`,
+            corrige: `Soit $p = P(\\text{vert})$. Alors $P(\\text{bleu}) = 2p$, et la somme des probabilités vaut $1$ : $${fmt(pRouge)} + 2p + p + ${fmt(pAutre)} = 1$, soit $3p = 1 - ${fmt(pRouge)} - ${fmt(pAutre)} = ${fmt(1 - pRouge - pAutre)}$, donc $p = ${fmt(pVert)}$.`
+          };
+        }
+      ];
+      let res = null, tries = 0;
+      while (!res && tries < 5) { res = pick(variantes)(); tries++; }
+      return res || { enonce: 'Une roue à 4 secteurs : P(A) = 0,2, P(B) = 0,3, P(C) = 0,3. Calculer P(D).', corrige: '$P(D) = 1 - 0{,}2 - 0{,}3 - 0{,}3 = 0{,}2$.' };
     }
   },
 
@@ -5551,31 +5884,58 @@ const generateurs = {
         corrige: `$\\vec{AB}\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix} = \\begin{pmatrix} ${formSous(xB, xA)} \\\\ ${formSous(yB, yA)} \\end{pmatrix} = \\begin{pmatrix} ${dx} \\\\ ${dy} \\end{pmatrix}$.`
       };
     } else if (d === 2) {
-      const xA = randNonZero(-5, 5);
-      const yA = randNonZero(-5, 5);
-      const dx = randNonZero(-5, 5);
-      const dy = randNonZero(-5, 5);
+      // Connaissant A et le vecteur AB, trouver B
+      // Restreindre A et B à [-4, 4] pour la figure
+      const xA = randNonZero(-3, 3);
+      const yA = randNonZero(-3, 3);
+      let dx = randNonZero(-3, 3);
+      let dy = randNonZero(-3, 3);
+      // S'assurer que B = A + (dx, dy) reste dans [-4, 4]
+      while (Math.abs(xA + dx) > 4 || Math.abs(yA + dy) > 4) {
+        dx = randNonZero(-3, 3);
+        dy = randNonZero(-3, 3);
+      }
       const xB = xA + dx;
       const yB = yA + dy;
       const sX = dx >= 0 ? `+ ${dx}` : `- ${-dx}`;
       const sY = dy >= 0 ? `+ ${dy}` : `- ${-dy}`;
       const dxAff = dx >= 0 ? `+ ${dx}` : `+ (${dx})`;
       const dyAff = dy >= 0 ? `+ ${dy}` : `+ (${dy})`;
+      // Figure : repère avec A et vecteur AB partant de A
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += tracerVecteur(r, xA, yA, xB, yB, { label: null });
+      svg += r.fermer();
       return {
-        enonce: `Soit $A(${xA}\\,;\\,${yA})$ et $\\vec{AB}\\begin{pmatrix} ${dx} \\\\ ${dy} \\end{pmatrix}$. Déterminer les coordonnées du point $B$.`,
+        enonce: `Soit $A(${xA}\\,;\\,${yA})$ et $\\vec{AB}\\begin{pmatrix} ${dx} \\\\ ${dy} \\end{pmatrix}$ (le vecteur est représenté ci-contre). Déterminer les coordonnées du point $B$.`,
+        svg: svg,
         corrige: `$x_B = x_A ${dxAff} = ${xA} ${sX} = ${xB}$ et $y_B = y_A ${dyAff} = ${yA} ${sY} = ${yB}$. Donc $B(${xB}\\,;\\,${yB})$.`
       };
     } else {
-      const xB = randNonZero(-5, 5);
-      const yB = randNonZero(-5, 5);
-      const dx = randNonZero(-5, 5);
-      const dy = randNonZero(-5, 5);
+      // Connaissant B et le vecteur AB, trouver A
+      const xB = randNonZero(-3, 3);
+      const yB = randNonZero(-3, 3);
+      let dx = randNonZero(-3, 3);
+      let dy = randNonZero(-3, 3);
+      // S'assurer que A = B - (dx, dy) reste dans [-4, 4]
+      while (Math.abs(xB - dx) > 4 || Math.abs(yB - dy) > 4) {
+        dx = randNonZero(-3, 3);
+        dy = randNonZero(-3, 3);
+      }
       const xA = xB - dx;
       const yA = yB - dy;
       const sXB = dx >= 0 ? `${dx}` : `(${dx})`;
       const sYB = dy >= 0 ? `${dy}` : `(${dy})`;
+      // Figure : repère avec B et vecteur AB arrivant à B
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += tracerVecteur(r, xA, yA, xB, yB, { label: null });
+      svg += r.fermer();
       return {
-        enonce: `Soit $B(${xB}\\,;\\,${yB})$ et $\\vec{AB}\\begin{pmatrix} ${dx} \\\\ ${dy} \\end{pmatrix}$. Déterminer les coordonnées du point $A$.`,
+        enonce: `Soit $B(${xB}\\,;\\,${yB})$ et $\\vec{AB}\\begin{pmatrix} ${dx} \\\\ ${dy} \\end{pmatrix}$ (le vecteur arrive à $B$ sur la figure). Déterminer les coordonnées du point $A$.`,
+        svg: svg,
         corrige: `On a $x_B - x_A = ${dx}$, donc $x_A = x_B - ${sXB} = ${xA}$. De même $y_A = ${yB} - ${sYB} = ${yA}$. Donc $A(${xA}\\,;\\,${yA})$.`
       };
     }
@@ -5584,40 +5944,77 @@ const generateurs = {
   // GÉO - Vecteurs - Somme de vecteurs
   vec_somme: (d) => {
     if (d === 1) {
-      const u1 = randNonZero(-5, 5);
-      const u2 = randNonZero(-5, 5);
-      const v1 = randNonZero(-5, 5);
-      const v2 = randNonZero(-5, 5);
+      // Coordonnées restreintes à [-3, 3] pour que les vecteurs et leur somme rentrent
+      const u1 = randNonZero(-3, 3);
+      const u2 = randNonZero(-3, 3);
+      let v1 = randNonZero(-3, 3);
+      let v2 = randNonZero(-3, 3);
+      // S'assurer que la somme reste dans [-4, 4] pour le repère
+      while (Math.abs(u1 + v1) > 4 || Math.abs(u2 + v2) > 4) {
+        v1 = randNonZero(-3, 3);
+        v2 = randNonZero(-3, 3);
+      }
       const s1 = v1 >= 0 ? `+ ${v1}` : `- ${-v1}`;
       const s2 = v2 >= 0 ? `+ ${v2}` : `- ${-v2}`;
+      // Figure : vecteurs u et v depuis l'origine, puis u+v en pointillés
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, 0, 0, u1, u2, { label: 'u', couleur: GRAPH_BLEU });
+      svg += tracerVecteur(r, 0, 0, v1, v2, { label: 'v', couleur: '#8b6914' });
+      svg += r.fermer();
       return {
-        enonce: `Calculer les coordonnées du vecteur $\\vec{u} + \\vec{v}$ avec $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$.`,
+        enonce: `Calculer les coordonnées du vecteur $\\vec{u} + \\vec{v}$ avec $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$ (voir figure ci-contre).`,
+        svg: svg,
         corrige: `$\\vec{u} + \\vec{v} = \\begin{pmatrix} ${u1} ${s1} \\\\ ${u2} ${s2} \\end{pmatrix} = \\begin{pmatrix} ${u1+v1} \\\\ ${u2+v2} \\end{pmatrix}$.`
       };
     } else if (d === 2) {
       // Moyen : combinaison linéaire k*u + v avec k entier non nul, différent de 1 et -1
-      const k = pick([2, 3, -2, -3]);
-      const u1 = randNonZero(-4, 4);
-      const u2 = randNonZero(-4, 4);
-      const v1 = randNonZero(-4, 4);
-      const v2 = randNonZero(-4, 4);
-      // Affichage propre des additions/soustractions
+      // Restreindre pour que k*u et v rentrent dans le repère
+      const k = pick([2, -2]); // garder k = ±2 seulement pour figure
+      const u1 = randNonZero(-2, 2);
+      const u2 = randNonZero(-2, 2);
+      const v1 = randNonZero(-3, 3);
+      const v2 = randNonZero(-3, 3);
       const ku1 = k*u1, ku2 = k*u2;
       const s1 = v1 >= 0 ? `+ ${v1}` : `- ${-v1}`;
       const s2 = v2 >= 0 ? `+ ${v2}` : `- ${-v2}`;
+      // Figure : montrer u et v depuis l'origine (k*u et v+k*u peuvent être trop grands)
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, 0, 0, u1, u2, { label: 'u', couleur: GRAPH_BLEU });
+      svg += tracerVecteur(r, 0, 0, v1, v2, { label: 'v', couleur: '#8b6914' });
+      svg += r.fermer();
       return {
-        enonce: `Calculer les coordonnées du vecteur $${k}\\vec{u} + \\vec{v}$ avec $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$.`,
+        enonce: `Calculer les coordonnées du vecteur $${k}\\vec{u} + \\vec{v}$ avec $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$ (voir figure ci-contre).`,
+        svg: svg,
         corrige: `$${k}\\vec{u} + \\vec{v} = \\begin{pmatrix} ${ku1} ${s1} \\\\ ${ku2} ${s2} \\end{pmatrix} = \\begin{pmatrix} ${k*u1+v1} \\\\ ${k*u2+v2} \\end{pmatrix}$.`
       };
     } else {
-      const xA = randNonZero(-4, 4);
-      const yA = randNonZero(-4, 4);
-      const xB = randNonZero(-4, 4);
-      const yB = randNonZero(-4, 4);
-      const xC = randNonZero(-4, 4);
-      const yC = randNonZero(-4, 4);
+      // Difficile : relation de Chasles avec 3 points A, B, C
+      // Restreindre les coords à [-3, 3] pour que tous les points rentrent et la figure soit claire
+      const xA = randNonZero(-3, 3);
+      const yA = randNonZero(-3, 3);
+      let xB = randNonZero(-3, 3);
+      let yB = randNonZero(-3, 3);
+      let xC = randNonZero(-3, 3);
+      let yC = randNonZero(-3, 3);
+      // Éviter les points confondus
+      while ((xA === xB && yA === yB) || (xB === xC && yB === yC) || (xA === xC && yA === yC)) {
+        xB = randNonZero(-3, 3); yB = randNonZero(-3, 3);
+        xC = randNonZero(-3, 3); yC = randNonZero(-3, 3);
+      }
+      // Figure : trois points avec vecteurs AB et BC
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, xA, yA, xB, yB, { label: null, couleur: GRAPH_BLEU });
+      svg += tracerVecteur(r, xB, yB, xC, yC, { label: null, couleur: '#8b6914' });
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += placerPoint(r, xC, yC, 'C');
+      svg += r.fermer();
       return {
-        enonce: `Soient $A(${xA}\\,;\\,${yA})$, $B(${xB}\\,;\\,${yB})$ et $C(${xC}\\,;\\,${yC})$. Calculer les coordonnées de $\\vec{AB} + \\vec{BC}$ et identifier ce vecteur.`,
+        enonce: `Soient $A(${xA}\\,;\\,${yA})$, $B(${xB}\\,;\\,${yB})$ et $C(${xC}\\,;\\,${yC})$ (voir figure ci-contre). Calculer les coordonnées de $\\vec{AB} + \\vec{BC}$ et identifier ce vecteur.`,
+        svg: svg,
         corrige: `Par la relation de Chasles : $\\vec{AB} + \\vec{BC} = \\vec{AC}$. Ses coordonnées sont $\\begin{pmatrix} ${xC - xA} \\\\ ${yC - yA} \\end{pmatrix}$.`
       };
     }
@@ -5627,38 +6024,72 @@ const generateurs = {
   vec_colin: (d) => {
     if (d === 1) {
       const colin = pick([true, false]);
-      const u1 = randNonZero(-4, 4);
-      const u2 = randNonZero(-4, 4);
-      const k = randNonZero(-3, 3);
-      const v1 = colin ? k*u1 : u1 + randNonZero(1, 3);
-      const v2 = colin ? k*u2 : u2 + randNonZero(1, 3);
+      // Restreindre à [-3, 3] pour la figure
+      const u1 = randNonZero(-3, 3);
+      const u2 = randNonZero(-3, 3);
+      const k = pick([-2, 2]); // pour rester dans le repère
+      let v1, v2;
+      if (colin) {
+        v1 = k*u1; v2 = k*u2;
+        // Vérifier que ça rentre dans [-4, 4]
+        if (Math.abs(v1) > 4 || Math.abs(v2) > 4) {
+          // Cas non colinéaire à la place
+          v1 = u1 + (u1 > 0 ? 1 : -1);
+          v2 = u2 - (u2 > 0 ? 1 : -1);
+        }
+      } else {
+        v1 = u1 + (u1 > 0 ? 1 : -1);
+        v2 = u2 - (u2 > 0 ? 1 : -1);
+        if (Math.abs(v1) > 4) v1 = u1;
+        if (Math.abs(v2) > 4) v2 = u2;
+        // S'assurer qu'ils ne sont pas colinéaires malgré tout
+        if (u1*v2 - u2*v1 === 0) v2 = v2 + 1;
+        if (Math.abs(v2) > 4) v2 = v2 - 2;
+      }
       const det = u1*v2 - u2*v1;
-      // Affichage propre des facteurs (parenthèses si négatifs)
+      const colinReel = (det === 0);
       const u1Aff = u1 < 0 ? `(${u1})` : `${u1}`;
       const u2Aff = u2 < 0 ? `(${u2})` : `${u2}`;
       const v1Aff = v1 < 0 ? `(${v1})` : `${v1}`;
       const v2Aff = v2 < 0 ? `(${v2})` : `${v2}`;
-      // Affichage propre du u1*v2 - u2*v1 → si u2*v1 < 0, on écrit "+ |u2*v1|"
       const u2v1 = u2*v1;
       const u1v2 = u1*v2;
       const sousU2V1 = u2v1 >= 0 ? `- ${u2v1}` : `+ ${-u2v1}`;
+      // Figure : deux vecteurs depuis l'origine
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, 0, 0, u1, u2, { label: 'u', couleur: GRAPH_BLEU });
+      svg += tracerVecteur(r, 0, 0, v1, v2, { label: 'v', couleur: '#8b6914' });
+      svg += r.fermer();
       return {
-        enonce: `Les vecteurs $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$ sont-ils colinéaires ?`,
-        corrige: `Déterminant : $x_u \\times y_v - y_u \\times x_v = ${u1Aff} \\times ${v2Aff} - ${u2Aff} \\times ${v1Aff} = ${u1v2} ${sousU2V1} = ${det}$. ${det === 0 ? 'Le déterminant est nul, donc $\\vec{u}$ et $\\vec{v}$ sont colinéaires.' : 'Le déterminant est non nul, donc $\\vec{u}$ et $\\vec{v}$ ne sont pas colinéaires.'}`
+        enonce: `Les vecteurs $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$ sont-ils colinéaires (voir figure ci-contre) ?`,
+        svg: svg,
+        corrige: `Déterminant : $x_u \\times y_v - y_u \\times x_v = ${u1Aff} \\times ${v2Aff} - ${u2Aff} \\times ${v1Aff} = ${u1v2} ${sousU2V1} = ${det}$. ${colinReel ? 'Le déterminant est nul, donc $\\vec{u}$ et $\\vec{v}$ sont colinéaires.' : 'Le déterminant est non nul, donc $\\vec{u}$ et $\\vec{v}$ ne sont pas colinéaires.'}`
       };
     } else if (d === 2) {
       // Moyen : trouver le coefficient k tel que v = k*u
-      const u1 = randNonZero(2, 4);
-      const u2 = randNonZero(2, 4);
-      const k = pick([-3, -2, 2, 3]); // pas 1 ou -1 pour que ce soit intéressant
-      const v1 = k*u1;
-      const v2 = k*u2;
+      // Pour la figure : k = 2 ou -2 pour que les deux vecteurs rentrent
+      const u1 = randNonZero(1, 2);
+      const u2 = randNonZero(1, 2);
+      const signe = pick([1, -1]);
+      const k = pick([2, -2]); // k = 2 ou -2 pour figure lisible
+      const u1Final = u1 * signe;
+      const u2Final = u2 * signe;
+      const v1 = k * u1Final;
+      const v2 = k * u2Final;
+      // Figure : montrer u et v depuis l'origine
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, 0, 0, u1Final, u2Final, { label: 'u', couleur: GRAPH_BLEU });
+      svg += tracerVecteur(r, 0, 0, v1, v2, { label: 'v', couleur: '#8b6914' });
+      svg += r.fermer();
       return {
-        enonce: `Montrer que les vecteurs $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$ sont colinéaires et donner le coefficient $k$ tel que $\\vec{v} = k\\vec{u}$.`,
-        corrige: `On cherche $k$ tel que $${v1} = k \\times ${u1}$ et $${v2} = k \\times ${u2}$, soit $k = ${k}$ dans les deux cas. Donc $\\vec{v} = ${k}\\vec{u}$, les vecteurs sont colinéaires.`
+        enonce: `Montrer que les vecteurs $\\vec{u}\\begin{pmatrix} ${u1Final} \\\\ ${u2Final} \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} ${v1} \\\\ ${v2} \\end{pmatrix}$ sont colinéaires et donner le coefficient $k$ tel que $\\vec{v} = k\\vec{u}$.`,
+        svg: svg,
+        corrige: `On cherche $k$ tel que $${v1} = k \\times ${u1Final}$ et $${v2} = k \\times ${u2Final}$, soit $k = ${k}$ dans les deux cas. Donc $\\vec{v} = ${k}\\vec{u}$, les vecteurs sont colinéaires.`
       };
     } else {
-      // Difficile : trouver y pour que deux vecteurs soient colinéaires
+      // Difficile : trouver y pour que deux vecteurs soient colinéaires (sans figure : trop abstrait)
       const u1 = randNonZero(2, 4);
       const u2 = randNonZero(2, 4);
       const k = randNonZero(2, 4);
@@ -5674,16 +6105,21 @@ const generateurs = {
   // GÉO - Vecteurs - Norme d'un vecteur
   vec_norme: (d) => {
     if (d === 1) {
-      const triplets = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15]];
-      const [a, b, c] = pick(triplets);
+      // Restreindre au triplet 3-4-5 pour que le vecteur rentre dans le repère
+      const a = 3, b = 4, c = 5;
       const signs = pick([[1,1], [-1,1], [1,-1], [-1,-1]]);
       const u1 = signs[0]*a;
       const u2 = signs[1]*b;
-      // Pour les carrés, parenthéser les négatifs
       const u1Aff = u1 >= 0 ? `${u1}^2` : `(${u1})^2`;
       const u2Aff = u2 >= 0 ? `${u2}^2` : `(${u2})^2`;
+      // Figure : vecteur depuis l'origine (rentre car u1 ∈ {-3, 3}, u2 ∈ {-4, 4})
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, 0, 0, u1, u2, { label: 'u', couleur: GRAPH_BLEU });
+      svg += r.fermer();
       return {
-        enonce: `Calculer la norme du vecteur $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$.`,
+        enonce: `Calculer la norme du vecteur $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ représenté ci-contre.`,
+        svg: svg,
         corrige: `$\\|\\vec{u}\\| = \\sqrt{${u1Aff} + ${u2Aff}} = \\sqrt{${u1*u1} + ${u2*u2}} = \\sqrt{${u1*u1+u2*u2}} = ${c}$.`
       };
     } else if (d === 2) {
@@ -5694,24 +6130,41 @@ const generateurs = {
       const estEntier = Number.isInteger(racine);
       const u1Aff = u1 >= 0 ? `${u1}^2` : `(${u1})^2`;
       const u2Aff = u2 >= 0 ? `${u2}^2` : `(${u2})^2`;
+      // Figure : vecteur depuis l'origine
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += tracerVecteur(r, 0, 0, u1, u2, { label: 'u', couleur: GRAPH_BLEU });
+      svg += r.fermer();
       return {
-        enonce: `Calculer la norme du vecteur $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$.`,
+        enonce: `Calculer la norme du vecteur $\\vec{u}\\begin{pmatrix} ${u1} \\\\ ${u2} \\end{pmatrix}$ représenté ci-contre.`,
+        svg: svg,
         corrige: `$\\|\\vec{u}\\| = \\sqrt{${u1Aff} + ${u2Aff}} = \\sqrt{${u1*u1} + ${u2*u2}} = \\sqrt{${carre}}${estEntier ? ` = ${racine}` : ''}$.`
       };
     } else {
-      const xA = randNonZero(-4, 4);
-      const yA = randNonZero(-4, 4);
-      const xB = randNonZero(-4, 4);
-      const yB = randNonZero(-4, 4);
-      const dx = xB - xA;
-      const dy = yB - yA;
+      // Distance entre deux points : on peut faire une figure si on restreint
+      const variantes = [
+        { xA: -1, yA: -2, xB: 2, yB: 2 },   // (3, 4) → 5
+        { xA: 2, yA: 1, xB: -1, yB: -3 },    // (-3, -4) → 5
+        { xA: -2, yA: 3, xB: 1, yB: -1 },    // (3, -4) → 5
+        { xA: 0, yA: 2, xB: 3, yB: -2 }      // (3, -4) → 5
+      ];
+      const v = pick(variantes);
+      const dx = v.xB - v.xA;
+      const dy = v.yB - v.yA;
       const carre = dx*dx + dy*dy;
       const racine = Math.sqrt(carre);
       const estEntier = Number.isInteger(racine);
       const dxAff = dx >= 0 ? `${dx}` : `(${dx})`;
       const dyAff = dy >= 0 ? `${dy}` : `(${dy})`;
+      // Figure : repère avec A et B
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, v.xA, v.yA, 'A');
+      svg += placerPoint(r, v.xB, v.yB, 'B');
+      svg += r.fermer();
       return {
-        enonce: `Soient $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$. Calculer la distance $AB$.`,
+        enonce: `Soient $A(${v.xA}\\,;\\,${v.yA})$ et $B(${v.xB}\\,;\\,${v.yB})$ (voir figure ci-contre). Calculer la distance $AB$.`,
+        svg: svg,
         corrige: `$AB = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2} = \\sqrt{${dxAff}^2 + ${dyAff}^2} = \\sqrt{${dx*dx} + ${dy*dy}} = \\sqrt{${carre}}${estEntier ? ` = ${racine}` : ''}$.`
       };
     }
@@ -5917,10 +6370,15 @@ const generateurs = {
         corrige: `$AB = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2} = \\sqrt{${dxAff}^2 + ${dyAff}^2} = \\sqrt{${dx*dx} + ${dy*dy}} = \\sqrt{${dx*dx+dy*dy}} = ${v.c}$.`
       };
     } else if (d === 2) {
-      const xA = randNonZero(-4, 4);
-      const yA = randNonZero(-4, 4);
-      const xB = randNonZero(-4, 4);
-      const yB = randNonZero(-4, 4);
+      // Coords dans [-4, 4] : A et B rentrent dans le repère
+      let xA = randNonZero(-4, 4);
+      let yA = randNonZero(-4, 4);
+      let xB = randNonZero(-4, 4);
+      let yB = randNonZero(-4, 4);
+      // Éviter A = B
+      while (xA === xB && yA === yB) {
+        xB = randNonZero(-4, 4); yB = randNonZero(-4, 4);
+      }
       const dx = xB - xA;
       const dy = yB - yA;
       const carre = dx*dx + dy*dy;
@@ -5928,21 +6386,46 @@ const generateurs = {
       const estEntier = Number.isInteger(racine);
       const dxAff = dx >= 0 ? `${dx}` : `(${dx})`;
       const dyAff = dy >= 0 ? `${dy}` : `(${dy})`;
+      // Figure : repère avec A et B
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += r.fermer();
       return {
-        enonce: `Calculer la distance $AB$ entre les points $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$. Donner la valeur exacte.`,
+        enonce: `Calculer la distance $AB$ entre les points $A(${xA}\\,;\\,${yA})$ et $B(${xB}\\,;\\,${yB})$ (voir figure ci-contre). Donner la valeur exacte.`,
+        svg: svg,
         corrige: `$AB = \\sqrt{${dxAff}^2 + ${dyAff}^2} = \\sqrt{${dx*dx} + ${dy*dy}} = \\sqrt{${carre}}${estEntier ? ` = ${racine}` : ''}$.`
       };
     } else {
+      // Triangle rectangle en A : A, B sur même y, A, C sur même x
       const xA = randNonZero(-3, 3), yA = randNonZero(-3, 3);
-      const xB = xA + pick([3, -3, 4, -4]);
+      // Ajuster pour rester dans [-4, 4]
+      let dxB = pick([3, -3, 4, -4]);
+      while (Math.abs(xA + dxB) > 4) dxB = pick([3, -3]);
+      let dyC = pick([3, -3, 4, -4]);
+      while (Math.abs(yA + dyC) > 4) dyC = pick([3, -3]);
+      const xB = xA + dxB;
       const yB = yA;
       const xC = xA;
-      const yC = yA + pick([3, -3, 4, -4]);
+      const yC = yA + dyC;
       const AB = Math.abs(xB - xA);
       const AC = Math.abs(yC - yA);
       const carreBC = (xC-xB)*(xC-xB) + (yC-yB)*(yC-yB);
+      // Figure : triangle ABC avec ses 3 sommets et côtés
+      const r = creerRepere({});
+      let svg = r.svg;
+      // Tracer le triangle (segments)
+      svg += `<line x1="${r.xPix(xA)}" y1="${r.yPix(yA)}" x2="${r.xPix(xB)}" y2="${r.yPix(yB)}" stroke="${GRAPH_BLEU}" stroke-width="1.5"/>`;
+      svg += `<line x1="${r.xPix(xA)}" y1="${r.yPix(yA)}" x2="${r.xPix(xC)}" y2="${r.yPix(yC)}" stroke="${GRAPH_BLEU}" stroke-width="1.5"/>`;
+      svg += `<line x1="${r.xPix(xB)}" y1="${r.yPix(yB)}" x2="${r.xPix(xC)}" y2="${r.yPix(yC)}" stroke="${GRAPH_BLEU}" stroke-width="1.5"/>`;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += placerPoint(r, xC, yC, 'C');
+      svg += r.fermer();
       return {
-        enonce: `Soient $A(${xA}\\,;\\,${yA})$, $B(${xB}\\,;\\,${yB})$, $C(${xC}\\,;\\,${yC})$. Montrer que le triangle $ABC$ est rectangle en $A$.`,
+        enonce: `Soient $A(${xA}\\,;\\,${yA})$, $B(${xB}\\,;\\,${yB})$, $C(${xC}\\,;\\,${yC})$ (voir figure ci-contre). Montrer que le triangle $ABC$ est rectangle en $A$.`,
+        svg: svg,
         corrige: `$AB = ${AB}$ (distance horizontale), $AC = ${AC}$ (distance verticale). $BC^2 = (${xC-xB})^2 + (${yC-yB})^2 = ${carreBC}$. Or $AB^2 + AC^2 = ${AB*AB} + ${AC*AC} = ${AB*AB+AC*AC}$. Comme $BC^2 = AB^2 + AC^2$, par la réciproque du théorème de Pythagore, $ABC$ est rectangle en $A$.`
       };
     }
@@ -5982,28 +6465,56 @@ const generateurs = {
       };
     } else if (d === 2) {
       // Moyen : trouver B connaissant A et M (entiers)
-      const xA = randNonZero(-4, 4);
-      const yA = randNonZero(-4, 4);
-      const xM = randNonZero(-4, 4);
-      const yM = randNonZero(-4, 4);
+      // Pour la figure : A et M dans [-3, 3] pour que B = 2M - A reste dans [-4, 4] maximum
+      let xA = randNonZero(-3, 3);
+      let yA = randNonZero(-3, 3);
+      let xM = randNonZero(-3, 3);
+      let yM = randNonZero(-3, 3);
+      // S'assurer que xB = 2xM - xA ∈ [-4, 4]
+      while (Math.abs(2*xM - xA) > 4 || Math.abs(2*yM - yA) > 4 || (xM === xA && yM === yA)) {
+        xA = randNonZero(-3, 3);
+        yA = randNonZero(-3, 3);
+        xM = randNonZero(-3, 3);
+        yM = randNonZero(-3, 3);
+      }
       const xB = 2*xM - xA;
       const yB = 2*yM - yA;
+      // Figure : A et M placés, B à trouver
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xM, yM, 'M');
+      svg += r.fermer();
       return {
-        enonce: `$M(${xM}\\,;\\,${yM})$ est le milieu du segment $[AB]$ et $A(${xA}\\,;\\,${yA})$. Déterminer les coordonnées de $B$.`,
+        enonce: `$M(${xM}\\,;\\,${yM})$ est le milieu du segment $[AB]$ et $A(${xA}\\,;\\,${yA})$ (voir figure ci-contre). Déterminer les coordonnées de $B$.`,
+        svg: svg,
         corrige: `Comme $x_M = \\dfrac{x_A + x_B}{2}$, on a $x_B = 2x_M - x_A = 2 \\times ${xM} - (${xA}) = ${xB}$. De même $y_B = 2 \\times ${yM} - (${yA}) = ${yB}$. Donc $B(${xB}\\,;\\,${yB})$.`
       };
     } else {
       // Difficile : vérification de milieu avec coords entières
-      const xA = pick([-4, -2, 0, 2, 4]);
-      const yA = pick([-4, -2, 0, 2, 4]);
-      const xB = pick([-4, -2, 0, 2, 4]);
-      const yB = pick([-4, -2, 0, 2, 4]);
+      let xA = pick([-4, -2, 0, 2, 4]);
+      let yA = pick([-4, -2, 0, 2, 4]);
+      let xB = pick([-4, -2, 0, 2, 4]);
+      let yB = pick([-4, -2, 0, 2, 4]);
+      while (xA === xB && yA === yB) {
+        xB = pick([-4, -2, 0, 2, 4]);
+        yB = pick([-4, -2, 0, 2, 4]);
+      }
       const xM = (xA + xB) / 2;
       const yM = (yA + yB) / 2;
       const xBaff = xB < 0 ? `(${xB})` : `${xB}`;
       const yBaff = yB < 0 ? `(${yB})` : `${yB}`;
+      // Figure : A, B, et M sur le repère
+      const r = creerRepere({});
+      let svg = r.svg;
+      svg += `<line x1="${r.xPix(xA)}" y1="${r.yPix(yA)}" x2="${r.xPix(xB)}" y2="${r.yPix(yB)}" stroke="${GRAPH_BLEU}" stroke-width="1" stroke-dasharray="3,2"/>`;
+      svg += placerPoint(r, xA, yA, 'A');
+      svg += placerPoint(r, xB, yB, 'B');
+      svg += placerPoint(r, xM, yM, 'M');
+      svg += r.fermer();
       return {
-        enonce: `Soient $A(${xA}\\,;\\,${yA})$, $B(${xB}\\,;\\,${yB})$ et $M(${xM}\\,;\\,${yM})$. Montrer que $M$ est le milieu de $[AB]$.`,
+        enonce: `Soient $A(${xA}\\,;\\,${yA})$, $B(${xB}\\,;\\,${yB})$ et $M(${xM}\\,;\\,${yM})$ (voir figure ci-contre). Montrer que $M$ est le milieu de $[AB]$.`,
+        svg: svg,
         corrige: `On vérifie : $\\dfrac{x_A + x_B}{2} = \\dfrac{${xA} + ${xBaff}}{2} = ${xM} = x_M$ et $\\dfrac{y_A + y_B}{2} = \\dfrac{${yA} + ${yBaff}}{2} = ${yM} = y_M$. Donc $M$ est bien le milieu de $[AB]$.`
       };
     }
