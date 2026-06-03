@@ -477,10 +477,10 @@ const ARBRE = [
   // accompagnées d'un rappel de cours optionnel groupé en tête de fiche.
   { id: 'revisions', titre: 'RÉVISIONS — Contrôles & Bac', profils: ['terminale_spe'], enfants: [
    { id: 'rev_annales', titre: 'Annales — questions rapides (type bac)', enfants: [
-      { id: '_qcm', titre: 'QCM (4 propositions)', enfants: [
-        { id: '_qcm_primitive_xex', titre: 'Primitive de $x\\,e^{x}$', actif: true },
-        { id: '_qcm_limite_geom', titre: 'Limite d\'un quotient de puissances', actif: true },
-        { id: '_qcm_binom_param', titre: 'Paramètres d\'une loi binomiale', actif: true },
+      { id: 'rev_annales_qcm', titre: 'QCM (4 propositions)', enfants: [
+        { id: 'rev_annales_qcm_primitive_xex', titre: 'Primitive de $x\,e^{x}$', actif: true },
+        { id: 'rev_annales_qcm_limite_geom', titre: 'Limite d\'un quotient de puissances', actif: true },
+        { id: 'rev_annales_qcm_binom_param', titre: 'Paramètres d\'une loi binomiale', actif: true },
         { id: 'rev_annales_qcm_derivee_xln', titre: 'Dérivée d\'un produit avec $\\ln$', actif: true },
         { id: 'rev_annales_qcm_asymptote', titre: 'Asymptote (équation)', actif: true },
         { id: 'rev_annales_qcm_convexite_fss', titre: 'Convexité par signe de $f\'\'$', actif: true },
