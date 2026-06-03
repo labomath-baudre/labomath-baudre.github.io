@@ -549,11 +549,19 @@ const ARBRE = [
         { id: 'rev_annales_ed_resoudre_homogene', titre: 'Résoudre $y\' = ay$ avec condition initiale', actif: true },
         { id: 'rev_annales_ed_resoudre_complete', titre: 'Résoudre $y\' = ay + b$ avec condition initiale', actif: true }
       ]},
-      { id: 'rev_annales_int', titre: 'Intégrales — calcul (type bac)', enfants: [
+     { id: 'rev_annales_int', titre: 'Intégrales — calcul (type bac)', enfants: [
         { id: 'rev_annales_int_primitive_directe', titre: 'Calcul direct par primitive', actif: true },
         { id: 'rev_annales_int_ipp', titre: 'Intégration par parties', actif: true },
         { id: 'rev_annales_int_aire', titre: 'Aire sous une courbe ou entre deux courbes', actif: true },
-        { id: 'rev_annales_int_valeur_moyenne', titre: 'Valeur moyenne d\'une fonction', actif: true }
+        { id: 'rev_annales_int_valeur_moyenne', titre: 'Valeur moyenne d\'une fonction', actif: true },
+        { id: 'rev_bac_int_polynome', titre: 'Intégrale d\'un polynôme', actif: true },
+        { id: 'rev_bac_int_exp_simple', titre: 'Intégrale avec exponentielle ($e^{ax+b}$)', actif: true },
+        { id: 'rev_bac_int_ipp_polyexp', titre: 'IPP : polynôme × exponentielle', actif: true },
+        { id: 'rev_bac_int_ipp_xln', titre: 'IPP : produit avec $\\ln$', actif: true },
+        { id: 'rev_bac_int_aire_courbes', titre: 'Aire entre deux courbes', actif: true },
+        { id: 'rev_bac_int_moyenne_bac', titre: 'Valeur moyenne (en contexte)', actif: true },
+        { id: 'rev_bac_int_primitive_verif', titre: 'Vérifier qu\'une fonction est primitive', actif: true },
+        { id: 'rev_bac_int_encadrement', titre: 'Encadrement d\'une intégrale', actif: true }
       ]},
       { id: 'rev_annales_etude', titre: 'Étude approfondie de fonction', enfants: [
         { id: 'rev_annales_tvi_etude_complete', titre: 'TVI : existence et encadrement de $\\alpha$', actif: true }
