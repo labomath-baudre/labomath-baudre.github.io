@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur d'automatismes — LaboMath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <!-- MathJax en mode SVG : produit des formules en SVG natif, capturables par html2canvas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']]
+      },
+      svg: {
+        fontCache: 'local',
+        scale: 1.05  // taille des formules
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'svg']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --couleur-fond: #f5efe4;
+      --couleur-fond-blanc: #ffffff;
+      --couleur-accent: #1e3a5f;
+      --couleur-accent-or: #c9b896;
+      --couleur-texte: #1a1a1a;
+      --couleur-texte-secondaire: #4a443c;
+      --couleur-texte-tertiaire: #6b6359;
+      --couleur-texte-disabled: #b8b0a1;
+      --couleur-bordure: #d9cfb8;
+      --couleur-bordure-claire: #e8dfd0;
+      --police-titre: 'Crimson Pro', Georgia, serif;
+      --police-corps: 'IBM Plex Sans', -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--police-corps);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--couleur-texte);
+      background: var(--couleur-fond);
+      padding: 2rem 1rem;
+    }
+    .container { max-width: 820px; margin: 0 auto; }
+    /* En-tête de navigation */
+    .nav-top {
+      max-width: 820px;
+      margin: 0 auto 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--couleur-bordure);
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-top a {
+      color: var(--couleur-accent);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .nav-top a:hover { color: var(--couleur-accent-or); }
+    h1 { font-family: var(--police-titre); font-size: 2rem; font-weight: 500; color: var(--couleur-accent); margin-bottom: 0.5rem; }
+    .intro { color: var(--couleur-texte-secondaire); margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .formulaire { background: var(--couleur-fond-blanc); border: 1px solid var(--couleur-bordure); border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem; }
+    .bloc { margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--couleur-bordure-claire); }
+    .bloc:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .bloc-titre { font-weight: 500; color: var(--couleur-accent); margin-bottom: 0.6rem; font-size: 1rem; }
+    .difficulte { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .difficulte label { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.4rem 0.8rem; border: 1px solid var(--couleur-bordure); border-radius: 3px; transition: background 0.15s, border-color 0.15s; }
+    .difficulte label:hover { background: var(--couleur-fond); }
+    .difficulte label:has(input:checked) { background: var(--couleur-fond); border-color: var(--couleur-accent); }
+    /* Sélecteur de profil */
+    .profil { display: flex; flex-direction: column; gap: 0.5rem; }
+    .profil label { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.8rem; border: 1px solid var(--couleur-bordure); border-radius: 3px; cursor: pointer; font-size: 0.95rem; transition: background 0.15s, border-color 0.15s; }
+    .profil label.profil-actif:hover { background: var(--couleur-fond); }
+    .profil label:has(input:checked) { background: var(--couleur-fond); border-color: var(--couleur-accent); font-weight: 500; color: var(--couleur-accent); }
+    .profil label.profil-bientot { color: var(--couleur-texte-disabled); cursor: not-allowed; font-style: italic; }
+    .profil label.profil-bientot input { cursor: not-allowed; }
+    .profil .badge { font-size: 0.72rem; color: var(--couleur-texte-disabled); padding: 1px 6px; border: 1px solid var(--couleur-bordure-claire); border-radius: 2px; margin-left: 0.4rem; font-style: normal; }
+    .etoiles { color: var(--couleur-accent-or); letter-spacing: 1px; }
+    .arbre { user-select: none; }
+    .noeud { margin-bottom: 2px; }
+    .ligne { display: flex; align-items: center; padding: 4px 6px; border-radius: 3px; transition: background 0.1s; }
+    .ligne:hover { background: var(--couleur-fond); }
+    .triangle { display: inline-block; width: 18px; cursor: pointer; color: var(--couleur-texte-tertiaire); font-size: 0.75rem; flex-shrink: 0; transition: transform 0.15s; }
+    .triangle.vide { cursor: default; }
+    .triangle.ouvert { transform: rotate(90deg); }
+    .case { width: 16px; height: 16px; accent-color: var(--couleur-accent); cursor: pointer; margin-right: 8px; flex-shrink: 0; }
+    .libelle { flex-grow: 1; cursor: pointer; font-size: 0.95rem; }
+    .libelle.parent-coche { color: var(--couleur-texte-tertiaire); font-style: italic; }
+    .libelle.bientot { color: var(--couleur-texte-disabled); font-style: italic; }
+    .badge { font-size: 0.7rem; color: var(--couleur-texte-disabled); padding: 1px 6px; border: 1px solid var(--couleur-bordure-claire); border-radius: 2px; margin-left: 0.5rem; }
+    .compteur { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; flex-shrink: 0; }
+    .compteur button { width: 22px; height: 22px; border: 1px solid var(--couleur-bordure); background: var(--couleur-fond-blanc); color: var(--couleur-accent); cursor: pointer; border-radius: 3px; font-size: 0.85rem; line-height: 1; padding: 0; font-weight: 500; }
+    .compteur button:hover { background: var(--couleur-fond); border-color: var(--couleur-accent); }
+    .compteur .valeur { width: 32px; text-align: center; font-size: 0.9rem; font-weight: 500; color: var(--couleur-accent); }
+    .compteur .valeur.zero { color: var(--couleur-texte-disabled); font-weight: 400; }
+    .niveau-2 { padding-left: 28px; }
+    .niveau-3 { padding-left: 56px; }
+    .niveau-4 { padding-left: 84px; }
+    .niveau-5 { padding-left: 112px; }
+    .barre-total { margin-top: 1rem; padding: 0.8rem 1rem; background: var(--couleur-fond); border-radius: 3px; display: flex; justify-content: space-between; align-items: center; font-weight: 500; color: var(--couleur-accent); }
+    .actions-rapides { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .bouton-petit { padding: 0.35rem 0.7rem; font-size: 0.82rem; background: var(--couleur-fond); color: var(--couleur-texte-tertiaire); border: 1px solid var(--couleur-bordure); border-radius: 3px; cursor: pointer; font-family: inherit; }
+    .bouton-petit:hover { background: var(--couleur-fond-blanc); color: var(--couleur-accent); border-color: var(--couleur-accent); }
+    .bouton { display: inline-block; background: var(--couleur-accent); color: white; border: none; padding: 0.75rem 1.8rem; border-radius: 3px; font-size: 1rem; font-weight: 500; cursor: pointer; font-family: inherit; }
+    .bouton:hover { background: #2a4d7a; }
+    .bouton:disabled { background: #999; cursor: not-allowed; }
+    .bouton-secondaire { background: var(--couleur-fond-blanc); color: var(--couleur-accent); border: 1px solid var(--couleur-accent); }
+    .bouton-secondaire:hover { background: var(--couleur-fond); }
+    .bouton-icone { background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: var(--couleur-texte-secondaire); padding: 0.25rem 0.5rem; line-height: 1; font-family: inherit; }
+    .bouton-icone:hover { color: var(--couleur-accent); }
+    .message { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 3px; display: none; font-size: 0.92rem; }
+    .message.erreur { background: #fbe9e7; color: #8b2c20; border: 1px solid #d4877a; }
+    .message.succes { background: #e7f4e8; color: #2c5e2e; border: 1px solid #7ab07c; }
+    /* ===== Modale d'aperçu ===== */
+    .modale-overlay {
+      position: fixed; inset: 0; background: rgba(30, 26, 22, 0.6); z-index: 1000;
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      animation: fadeIn 0.15s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modale-contenu {
+      background: var(--couleur-fond);
+      border: 1px solid var(--couleur-bordure);
+      border-radius: 6px;
+      max-width: 900px; width: 100%;
+      max-height: 90vh; display: flex; flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+    .modale-entete {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--couleur-bordure);
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+      background: var(--couleur-fond-blanc); border-radius: 6px 6px 0 0;
+    }
+    #apercu-liste-exos {
+      padding: 1rem 1.5rem; overflow-y: auto; flex: 1;
+    }
+    .apercu-exo {
+      background: var(--couleur-fond-blanc);
+      border: 1px solid var(--couleur-bordure);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+      min-height: 70px;
+      transition: background-color 0.25s ease, transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    }
+    .apercu-exo.juste-regenere {
+      background-color: #f9f1dc; /* un crème un peu plus chaud, momentané */
+    }
+    .apercu-exo.juste-deplace {
+      background-color: #eaf3ec; /* léger vert pâle */
+      box-shadow: 0 0 0 2px rgba(30, 90, 60, 0.15);
+    }
+    /* Poignée de drag à gauche */
+    .apercu-exo-poignee {
+      color: var(--couleur-bordure);
+      cursor: grab;
+      user-select: none;
+      font-size: 1rem;
+      padding: 0 0.25rem;
+      align-self: stretch;
+      display: flex; align-items: center;
+      letter-spacing: -2px;
+      touch-action: none; /* nécessaire pour le drag tactile */
+      transition: color 0.15s;
+    }
+    .apercu-exo-poignee:hover { color: var(--couleur-accent); }
+    .apercu-exo-poignee:active { cursor: grabbing; }
+    /* Bloc en cours de drag */
+    .apercu-exo.en-cours-drag {
+      opacity: 0.45;
+      transform: scale(0.98);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    /* Indicateurs de zone de dépôt */
+    .apercu-exo.zone-drop-avant {
+      box-shadow: 0 -3px 0 var(--couleur-accent) inset, 0 -3px 0 var(--couleur-accent);
+      border-top-color: var(--couleur-accent);
+    }
+    .apercu-exo.zone-drop-apres {
+      box-shadow: 0 3px 0 var(--couleur-accent) inset, 0 3px 0 var(--couleur-accent);
+      border-bottom-color: var(--couleur-accent);
+    }
+    .apercu-exo .apercu-exo-num {
+      font-weight: 600; color: var(--couleur-accent); font-size: 1.05rem;
+      min-width: 28px; flex-shrink: 0; margin-top: 2px;
+    }
+    .apercu-exo .apercu-exo-corps { flex: 1; min-width: 0; }
+    .apercu-exo .apercu-exo-titre {
+      font-size: 0.78rem; color: var(--couleur-texte-tertiaire); text-transform: uppercase;
+      letter-spacing: 0.04em; margin-bottom: 0.35rem; font-weight: 500;
+    }
+    .apercu-exo .apercu-exo-enonce {
+      font-family: var(--police-titre); font-size: 1rem; line-height: 1.5;
+      color: var(--couleur-texte);
+    }
+    .apercu-exo .apercu-exo-svg {
+      flex-shrink: 0;
+    }
+    .apercu-exo .apercu-exo-svg svg {
+      display: block; max-width: 120px; height: auto;
+    }
+    .apercu-exo .apercu-exo-code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background: var(--couleur-bordure-claire); padding: 0.5rem 0.75rem;
+      border-radius: 3px; margin-top: 0.5rem; font-size: 0.92rem;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .apercu-exo-actions {
+      display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0;
+    }
+    .bouton-regen {
+      background: transparent; border: 1px solid var(--couleur-bordure);
+      color: var(--couleur-accent); width: 36px; height: 36px;
+      border-radius: 3px; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .bouton-regen:hover { background: var(--couleur-accent); color: white; border-color: var(--couleur-accent); }
+    .bouton-regen.animating { animation: spin 0.4s ease-in-out; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .bouton-suppr {
+      background: transparent; border: 1px solid var(--couleur-bordure);
+      color: var(--couleur-texte-tertiaire); width: 36px; height: 36px;
+      border-radius: 3px; cursor: pointer; font-size: 0.95rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .bouton-suppr:hover { background: #c95a4f; color: white; border-color: #c95a4f; }
+    .bouton-dupliq {
+      background: transparent; border: 1px solid var(--couleur-bordure);
+      color: var(--couleur-accent); width: 36px; height: 36px;
+      border-radius: 3px; cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; font-family: inherit;
+      line-height: 1;
+    }
+    .bouton-dupliq:hover { background: var(--couleur-accent); color: white; border-color: var(--couleur-accent); }
+    /* Animation de disparition d'un exo supprimé */
+    .apercu-exo.en-suppression {
+      opacity: 0;
+      transform: translateX(20px) scale(0.96);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+    /* Feedback quand on essaie de supprimer le dernier exo */
+    .apercu-exo.suppr-bloquee {
+      animation: shake 0.4s ease-in-out;
+      border-color: #c95a4f;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-3px); }
+    }
+    .modale-pied {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--couleur-bordure);
+      display: flex; justify-content: space-between; gap: 0.75rem;
+      background: var(--couleur-fond-blanc); border-radius: 0 0 6px 6px;
+    }
+    @media (max-width: 600px) {
+      .modale-contenu { max-height: 100vh; border-radius: 0; }
+      .apercu-exo { flex-direction: column; }
+      .apercu-exo .apercu-exo-svg { align-self: center; }
+      .apercu-exo-actions { flex-direction: row; }
+      .modale-pied { flex-direction: column-reverse; }
+      .modale-pied .bouton { width: 100%; }
+    }
+    #apercu-pdf { display: none; }
+    #zone-pdf { background: white; padding: 50px 60px; width: 794px; font-family: 'Crimson Pro', Georgia, serif; color: #1a1a1a; }
+    /* Mode photocopieuse : aplatit toutes les couleurs en niveaux de gris contrastés */
+    #zone-pdf.mode-nb { filter: grayscale(100%) contrast(1.15); }
+    #zone-pdf .entete-pdf { border-bottom: 2px solid #1e3a5f; padding-bottom: 12px; margin-bottom: 24px; }
+    #zone-pdf .entete-pdf h2 { font-size: 22px; color: #1e3a5f; margin-bottom: 4px; }
+    #zone-pdf .entete-pdf .sous { font-size: 14px; color: #6b6359; line-height: 1.5; }
+    #zone-pdf .exercice { margin-bottom: 14px; page-break-inside: avoid; display: flex; gap: 14px; align-items: flex-start; }
+    #zone-pdf .exercice .num {
+      font-weight: 600;
+      color: #ffffff;
+      background: #1e3a5f;
+      font-size: 13px;
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      margin-top: 2px;
+    }
+    #zone-pdf .exercice .partie-texte { flex: 1; min-width: 0; }
+    #zone-pdf .exercice .enonce { font-size: 16px; line-height: 1.55; }
+    #zone-pdf .exercice .zone-brouillon {
+      /* Espace pour le brouillon / calculs intermédiaires : pas de cadre, juste de la place */
+      margin-top: 2px;
+      /* hauteur fixée inline selon la complexité */
+    }
+    #zone-pdf .exercice .reponse-cadre { margin-top: 4px; border: 1px solid #d9cfb8; border-radius: 2px; min-height: 48px; }
+    /* Espace de réponse ouvert (questions de révision/bac) : pas de cadre,
+       lignes très discrètes pour guider la rédaction sans enfermer la réponse */
+    #zone-pdf .exercice .reponse-ouverte {
+      margin-top: 6px;
+      background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, #ece4d2 27px, #ece4d2 28px);
+      /* hauteur fixée inline selon le type de question */
+    }
+    #zone-pdf .exercice .graphique { flex-shrink: 0; }
+    #zone-pdf .exercice .graphique svg { display: block; }
+    /* Style des blocs de code Python */
+    #zone-pdf .exercice code, #zone-pdf .corrige code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background-color: #f0e8d6;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.92em;
+      color: #1e3a5f;
+      border: 1px solid #d9cfb8;
+    }
+    #zone-pdf .exercice em, #zone-pdf .corrige em {
+      color: #6b6359;
+      font-style: italic;
+      font-size: 0.92em;
+    }
+    /* Bloc code Python à droite, comme un graphique. Largeur ajustée au contenu pour économiser l'encre */
+    #zone-pdf .exercice .code-python {
+      flex-shrink: 0;
+      background-color: #fafafa;       /* fond très clair pour économiser l'encre */
+      border: 1px solid #d9cfb8;
+      border-radius: 3px;
+      padding: 4px 8px;                /* padding réduit */
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      color: #1e3a5f;
+      line-height: 1.4;
+      white-space: pre;
+      max-width: 260px;                /* limite la largeur même si la ligne est longue */
+      width: max-content;              /* s'adapte au contenu */
+    }
+    /* Coloration syntaxique légère pour le code Python */
+    #zone-pdf .code-python .py-kw { color: #8b3a62; font-weight: 600; }   /* mots-clés (def, for, while, if...) */
+    #zone-pdf .code-python .py-str { color: #6b6359; font-style: italic; } /* chaînes de caractères */
+    #zone-pdf .code-python .py-num { color: #2d5a8b; }                     /* nombres */
+    #zone-pdf .code-python .py-com { color: #8a8275; font-style: italic; } /* commentaires */
+    /* Dans le bloc code-python, neutraliser le style des balises code/em (déjà en monospace globalement) */
+    #zone-pdf .exercice .code-python code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: 1em;
+      color: inherit;
+    }
+    #zone-pdf .section-corriges { page-break-before: always; padding-top: 30px; }
+    #zone-pdf .section-corriges h3 { font-size: 18px; color: #1e3a5f; border-bottom: 1px solid #d9cfb8; padding-bottom: 6px; margin-bottom: 16px; }
+    #zone-pdf .corrige { margin-bottom: 14px; font-size: 16px; line-height: 1.6; }
+    #zone-pdf .corrige .num { font-weight: 600; color: #1e3a5f; font-size: 16px; margin-right: 4px; }
+    #zone-pdf .corrige .texte { color: #4a443c; }
+    /* MathJax : assurer un rendu propre des SVG */
+    #zone-pdf mjx-container { font-size: 1.05em; }
+    /* Tableaux croisés (stats) — affichés en bloc, après l'énoncé */
+    #zone-pdf .tableau-zone {
+      margin: 8px 0;
+      page-break-inside: avoid;
+    }
+    .apercu-exo-tableau {
+      margin: 0.6rem 0 0.3rem 0;
+      overflow-x: auto;
+    }
+    #zone-pdf .tableau-croise, .apercu-exo-tableau .tableau-croise {
+      border-collapse: collapse;
+      font-size: 13px;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    #zone-pdf .tableau-croise th, .apercu-exo-tableau .tableau-croise th,
+    #zone-pdf .tableau-croise td, .apercu-exo-tableau .tableau-croise td {
+      border: 1px solid #b8a87d;
+      padding: 5px 12px;
+      text-align: center;
+      /* Réinitialiser explicitement toutes les propriétés
+         qui pourraient être héritées d'autres règles globales */
+      margin: 0;
+      display: table-cell;
+      background: transparent;
+      border-radius: 0;
+      box-sizing: border-box;
+    }
+    #zone-pdf .tableau-croise th, .apercu-exo-tableau .tableau-croise th {
+      background: #f0e8d6;
+      color: #1e3a5f;
+      font-weight: 500;
+    }
+    /* Cellules de total : on utilise des sélecteurs très spécifiques pour
+       écraser la règle globale .total du formulaire (display:flex, padding 0.8rem 1rem) */
+    #zone-pdf .tableau-croise td.total, #zone-pdf .tableau-croise th.total,
+    .apercu-exo-tableau .tableau-croise td.total, .apercu-exo-tableau .tableau-croise th.total {
+      background: #faf5e8;
+      font-weight: 500;
+      /* Forcer le mode cellule de tableau (et pas flex hérité) */
+      display: table-cell;
+      padding: 5px 12px;
+      margin: 0;
+      justify-content: unset;
+      align-items: unset;
+      border-radius: 0;
+    }
+    #zone-pdf .tableau-croise .inconnu, .apercu-exo-tableau .tableau-croise .inconnu {
+      background: #fef0d8;
+      color: #8b6914;
+      font-weight: 500;
+    }
+    #zone-pdf .pied-pdf { margin-top: 30px; padding-top: 10px; border-top: 1px solid #d9cfb8; font-size: 11px; color: #6b6359; text-align: center; }
+  </style>
+  <!-- LaboMath : moteur JS modulaire (chargé avant le script inline) -->
+  <script defer src="js/helpers.js"></script>
+  <script defer src="js/gen_commun.js"></script>
+  <script defer src="js/gen_lycee.js"></script>
+  <script defer src="js/gen_premiere_techno.js"></script>
+  <script defer src="js/gen_terminale.js"></script>
+  <script defer src="js/gen_annales.js"></script>
+</head>
+<body>
+<nav class="nav-top">
+  <a href="../">← Retour à l'accueil LaboMath</a>
+</nav>
+<div class="container">
+  <h1>Générateur d'automatismes</h1>
+  <p class="intro">Composez votre fiche en cochant les thèmes au niveau de précision souhaité. Les thèmes sont organisés selon les <strong>7 catégories officielles</strong> du Bulletin officiel (CN, CA, PP, EV, FR, ST, PR). Un thème principal coché tirera des questions équilibrées dans toutes ses sous-catégories. Pour cibler plus finement, déroulez l'arborescence.</p>
+  <div class="formulaire">
+    <div class="bloc">
+      <div class="bloc-titre">Profil de l'élève</div>
+      <div class="profil">
+        <label class="profil-actif"><input type="radio" name="profil" value="seconde" checked> Seconde (générale et technologique)</label>
+        <label class="profil-bientot"><input type="radio" name="profil" value="premiere_ss" disabled> Première générale — Sans spécialité <span class="badge">bientôt</span></label>
+        <label class="profil-bientot"><input type="radio" name="profil" value="premiere_spe" disabled> Première générale — Spécialité maths <span class="badge">bientôt</span></label>
+        <label class="profil-actif"><input type="radio" name="profil" value="premiere_stmg"> Première STMG</label>
+        <label class="profil-actif"><input type="radio" name="profil" value="premiere_sti2d"> Première STI2D</label>
+        <label class="profil-actif"><input type="radio" name="profil" value="terminale_spe"> Terminale — Spécialité maths</label>
+      </div>
+    </div>
+    <div class="bloc">
+      <div class="bloc-titre">Niveau de difficulté</div>
+      <div class="difficulte">
+        <label><input type="radio" name="difficulte" value="1"> <span class="etoiles">★</span> Facile</label>
+        <label><input type="radio" name="difficulte" value="2" checked> <span class="etoiles">★★</span> Moyen</label>
+        <label><input type="radio" name="difficulte" value="3"> <span class="etoiles">★★★</span> Difficile</label>
+      </div>
+    </div>
+    <div class="bloc">
+      <div class="bloc-titre">Espace pour les réponses</div>
+      <div class="difficulte">
+        <label><input type="radio" name="taille-reponse" value="aucun"> Aucun <span style="color: var(--couleur-texte-tertiaire); font-size: 0.85em;">(pas d'espace)</span></label>
+        <label><input type="radio" name="taille-reponse" value="petit" checked> Petit <span style="color: var(--couleur-texte-tertiaire); font-size: 0.85em;">(compact)</span></label>
+        <label><input type="radio" name="taille-reponse" value="moyen"> Moyen <span style="color: var(--couleur-texte-tertiaire); font-size: 0.85em;">(standard)</span></label>
+        <label><input type="radio" name="taille-reponse" value="grand"> Grand <span style="color: var(--couleur-texte-tertiaire); font-size: 0.85em;">(aéré)</span></label>
+      </div>
+    </div>
+    <div class="bloc">
+      <div class="bloc-titre">Options d'impression</div>
+      <div class="options-impression" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.4rem 0.8rem; border: 1px solid var(--couleur-bordure); border-radius: 3px; font-size: 0.92rem;">
+          <input type="checkbox" id="opt-nb"> Mode photocopieuse <span style="color: var(--couleur-texte-tertiaire);">(N&amp;B, économie d'encre)</span>
+        </label>
+        <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.4rem 0.8rem; border: 1px solid var(--couleur-bordure); border-radius: 3px; font-size: 0.92rem;">
+          <input type="checkbox" id="opt-hd"> Qualité supérieure <span style="color: var(--couleur-texte-tertiaire);">(PDF plus lourd, plus net)</span>
+        </label>
+      </div>
+    </div>
+    <div class="bloc">
+      <div class="bloc-titre">Thèmes à inclure</div>
+      <div class="actions-rapides">
+        <button type="button" class="bouton-petit" id="btn-tout-deplier">Tout déplier</button>
+        <button type="button" class="bouton-petit" id="btn-tout-replier">Tout replier</button>
+        <button type="button" class="bouton-petit" id="btn-tout-decocher">Tout décocher</button>
+      </div>
+      <div id="arbre" class="arbre"></div>
+    </div>
+    <div class="barre-total">
+      <span>Total : <span id="total-questions">0</span> question<span id="total-s"></span></span>
+      <span><span class="etoiles" id="etoiles-affichees">★★</span></span>
+    </div>
+    <div class="bloc" style="margin-top: 1.25rem;">
+      <div class="bloc-titre">Options du PDF</div>
+      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <input type="checkbox" id="corriges" checked>
+        Inclure les corrigés en fin de PDF
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 0.5rem;">
+        <input type="checkbox" id="rappels-cours" checked>
+        Inclure les rappels de cours (mémo en tête)
+      </label>
+    </div>
+    <div class="bloc" id="bloc-sujet-bac" style="margin-top: 1.25rem; display: none; border: 1px solid var(--couleur-accent-or); background: #faf6ec;">
+      <div class="bloc-titre">Sujet type bac</div>
+      <p style="margin: 0 0 0.6rem 0; font-size: 0.9rem; color: var(--couleur-texte-secondaire);">Génère automatiquement un panachage équilibré de questions « annales », réparties entre tous les types.</p>
+      <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+        <label style="font-size: 0.92rem;">Nombre de questions :
+          <input type="number" id="sujet-bac-nombre" value="8" min="1" max="40" step="1" style="width: 60px; padding: 0.3rem; border: 1px solid var(--couleur-bordure); border-radius: 3px; font-family: inherit; text-align: center;">
+        </label>
+        <button id="bouton-sujet-bac" class="bouton bouton-secondaire">Générer un sujet</button>
+      </div>
+    </div>
+    <button id="bouton-generer" class="bouton" style="margin-top: 1.25rem;">Aperçu de la fiche</button>
+    <div id="message" class="message"></div>
+  </div>
+</div>
+<div id="apercu-pdf"><div id="zone-pdf"></div></div>
+
+<!-- ===== MODALE D'APERÇU AVANT GÉNÉRATION DU PDF ===== -->
+<div id="modale-apercu" class="modale-overlay" style="display: none;">
+  <div class="modale-contenu">
+    <div class="modale-entete">
+      <div>
+        <h2 style="margin: 0; color: var(--bleu-encre);">Aperçu de la fiche</h2>
+        <p style="margin: 0.25rem 0 0 0; color: var(--gris-texte); font-size: 0.9rem;" id="apercu-sous-titre">Vérifie les exercices et clique sur ⟳ pour régénérer un exercice qui ne te plaît pas.</p>
+      </div>
+      <button id="bouton-fermer-apercu" class="bouton-icone" title="Fermer">✕</button>
+    </div>
+    <div id="apercu-liste-exos"></div>
+    <div class="modale-pied">
+      <button id="bouton-tout-regen" class="bouton bouton-secondaire">⟳ Tout regénérer</button>
+      <button id="bouton-imprimer" class="bouton">📄 Générer le PDF</button>
+    </div>
+  </div>
+</div>
+
+<script defer src="js/app.js"></script>
+</body>
+</html>
