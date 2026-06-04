@@ -132,20 +132,40 @@ Object.assign(window.LM_GEN ??= {}, {
       };
     }
 
-    // d === 3 : conditionnelle inverse (type Bayes)
+    // d === 3 : conditionnelle inverse (type Bayes), 2 variantes
+    const variantes = [
+      () => ({
+        enonce: `Dans une population, $2\\,\\%$ des personnes sont atteintes d'une maladie. ` +
+          `Un test médical est utilisé : il est positif chez les malades avec une probabilité de $0{,}95$, ` +
+          `et négatif chez les non-malades avec une probabilité de $0{,}95$.<br>` +
+          `On note $M$ : « la personne est malade » et $T$ : « le test est positif ».<br>` +
+          `On admet que $P(T) = 0{,}068$.<br>` +
+          `1. Une personne a un test positif. Quelle est la probabilité qu'elle soit malade ? Donner la valeur arrondie au millième.<br>` +
+          `2. Commenter ce résultat.`,
+        corrige: `<strong>1.</strong> On cherche $P_T(M) = \\dfrac{P(M \\cap T)}{P(T)} = \\dfrac{0{,}02 \\times 0{,}95}{0{,}068} = \\dfrac{0{,}019}{0{,}068} \\approx 0{,}279$.<br>` +
+          `<strong>2.</strong> Bien que le test soit fiable à $95\\,\\%$ dans les deux sens, une personne testée positive n'a que $27{,}9\\,\\%$ de chance d'être réellement malade. ` +
+          `Ce résultat surprenant s'explique par la rareté de la maladie ($2\\,\\%$) : il y a beaucoup plus de « faux positifs » que de vrais malades dans la population.`
+      }),
+      () => ({
+        // Contrôle qualité : pièces produites par 2 machines, défectueuses
+        // A produit 60%, B produit 40%. A : 3% défectueuses, B : 5% défectueuses
+        // P(D) = 0,6·0,03 + 0,4·0,05 = 0,018 + 0,02 = 0,038
+        // P_D(A) = P(A∩D)/P(D) = 0,018/0,038 ≈ 0,474
+        enonce: `Une usine produit des pièces sur deux machines $A$ et $B$. La machine $A$ produit $60\\,\\%$ des pièces, ` +
+          `et la machine $B$ en produit $40\\,\\%$. Parmi les pièces de $A$, $3\\,\\%$ sont défectueuses ; parmi celles de $B$, $5\\,\\%$ sont défectueuses.<br>` +
+          `On note $A$ : « la pièce vient de la machine $A$ » et $D$ : « la pièce est défectueuse ».<br>` +
+          `On admet que $P(D) = 0{,}038$.<br>` +
+          `1. Une pièce prélevée au hasard est défectueuse. Quelle est la probabilité qu'elle provienne de la machine $A$ ? Arrondir au millième.<br>` +
+          `2. Commenter ce résultat.`,
+        corrige: `<strong>1.</strong> $P_D(A) = \\dfrac{P(A \\cap D)}{P(D)} = \\dfrac{P(A) \\times P_A(D)}{P(D)} = \\dfrac{0{,}6 \\times 0{,}03}{0{,}038} = \\dfrac{0{,}018}{0{,}038} \\approx 0{,}474$.<br>` +
+          `<strong>2.</strong> Alors que $60\\,\\%$ des pièces sortent de la machine $A$, seulement $47{,}4\\,\\%$ des pièces défectueuses en proviennent. La machine $B$, bien que minoritaire, produit davantage de défauts proportionnellement.`
+      })
+    ];
+    const v = pick(variantes)();
     return {
-      enonce: `Dans une population, $2\\,\\%$ des personnes sont atteintes d'une maladie. ` +
-        `Un test médical est utilisé : il est positif chez les malades avec une probabilité de $0{,}95$, ` +
-        `et négatif chez les non-malades avec une probabilité de $0{,}95$.<br>` +
-        `On note $M$ : « la personne est malade » et $T$ : « le test est positif ».<br>` +
-        `On admet que $P(T) = 0{,}068$.<br>` +
-        `1. Une personne a un test positif. Quelle est la probabilité qu'elle soit malade ? Donner la valeur arrondie au millième.<br>` +
-        `2. Commenter ce résultat.`,
-      corrige: `<strong>1.</strong> On cherche $P_T(M)$. Par définition :<br>` +
-        `$P_T(M) = \\dfrac{P(M \\cap T)}{P(T)} = \\dfrac{P(M) \\times P_M(T)}{P(T)} = \\dfrac{0{,}02 \\times 0{,}95}{0{,}068} = \\dfrac{0{,}019}{0{,}068} \\approx 0{,}279$.<br>` +
-        `<strong>2.</strong> Bien que le test soit fiable à $95\\,\\%$ dans les deux sens, une personne testée positive n'a que $27{,}9\\,\\%$ de chance d'être réellement malade. ` +
-        `Ce résultat surprenant s'explique par la rareté de la maladie ($2\\,\\%$) : il y a beaucoup plus de « faux positifs » (non malades testés positifs) que de vrais malades dans la population.`,
-      rappel: `<strong>Probabilité conditionnelle inverse.</strong> $P_B(A) = \\dfrac{P(A \\cap B)}{P(B)} = \\dfrac{P(A) \\times P_A(B)}{P(B)}$. Cette formule (cas particulier de la formule de Bayes) permet de « renverser » le conditionnement quand on connaît $P(A)$, $P_A(B)$ et $P(B)$.`
+      enonce: v.enonce,
+      corrige: v.corrige,
+      rappel: `<strong>Probabilité conditionnelle inverse.</strong> $P_B(A) = \\dfrac{P(A \\cap B)}{P(B)} = \\dfrac{P(A) \\times P_A(B)}{P(B)}$. Cette formule (cas particulier de la formule de Bayes) permet de « renverser » le conditionnement.`
     };
   },
 
@@ -223,6 +243,45 @@ Object.assign(window.LM_GEN ??= {}, {
               `Interprétation : sur un grand nombre de prélèvements de $${n}$ composants, on s'attend à obtenir en moyenne $${ex}$ composants défectueux.<br>` +
               `<strong>3.</strong> $P(X = ${k}) = \\dbinom{${n}}{${k}} \\times 0{,}2^{${k}} \\times 0{,}8^{${n - k}} \\approx ${_pr_dec(px)}$.`
           };
+        },
+        () => {
+          // n = 30, p = 0,4 → E(X) = 12, V(X) = 30·0,4·0,6 = 7,2
+          const n = 30;
+          const p = 0.4;
+          const k = 10;
+          const ex = n * p;
+          const vx = n * p * (1 - p);
+          const px = _pr_arr4(_pr_binomP(n, p, k));
+          return {
+            enonce: `Une enquête montre que $40\\,\\%$ des consommateurs préfèrent une certaine marque. ` +
+              `On interroge $n = ${n}$ consommateurs au hasard (de manière indépendante). On note $X$ le nombre de personnes interrogées préférant cette marque.<br>` +
+              `1. Justifier que $X$ suit une loi binomiale dont on précisera les paramètres.<br>` +
+              `2. Calculer $E(X)$ et $V(X)$. Interpréter $E(X)$.<br>` +
+              `3. Calculer $P(X = ${k})$, arrondi à $10^{-4}$.`,
+            corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}4)$.<br>` +
+              `<strong>2.</strong> $E(X) = ${n} \\times 0{,}4 = ${ex}$ et $V(X) = ${n} \\times 0{,}4 \\times 0{,}6 = ${_pr_dec(vx)}$.<br>` +
+              `Interprétation : sur un grand nombre de sondages de $${n}$ personnes, on s'attend à $${ex}$ personnes préférant la marque en moyenne.<br>` +
+              `<strong>3.</strong> $P(X = ${k}) = \\dbinom{${n}}{${k}} \\times 0{,}4^{${k}} \\times 0{,}6^{${n - k}} \\approx ${_pr_dec(px)}$.`
+          };
+        },
+        () => {
+          // n = 40, p = 0,15 → E(X) = 6, V(X) = 40·0,15·0,85 = 5,1
+          const n = 40;
+          const p = 0.15;
+          const k = 5;
+          const ex = n * p;
+          const vx = n * p * (1 - p);
+          const px = _pr_arr4(_pr_binomP(n, p, k));
+          return {
+            enonce: `Un site de vente en ligne constate que $15\\,\\%$ des visiteurs effectuent un achat. ` +
+              `Sur une journée, $${n}$ visiteurs indépendants consultent le site. On note $X$ le nombre d'acheteurs.<br>` +
+              `1. Justifier que $X$ suit une loi binomiale dont on précisera les paramètres.<br>` +
+              `2. Calculer $E(X)$ et $V(X)$.<br>` +
+              `3. Calculer $P(X = ${k})$, arrondi à $10^{-4}$.`,
+            corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}15)$.<br>` +
+              `<strong>2.</strong> $E(X) = ${n} \\times 0{,}15 = ${ex}$ et $V(X) = ${n} \\times 0{,}15 \\times 0{,}85 = ${_pr_dec(vx)}$.<br>` +
+              `<strong>3.</strong> $P(X = ${k}) = \\dbinom{${n}}{${k}} \\times 0{,}15^{${k}} \\times 0{,}85^{${n - k}} \\approx ${_pr_dec(px)}$.`
+          };
         }
       ];
       const v = pick(variantes)();
@@ -233,24 +292,53 @@ Object.assign(window.LM_GEN ??= {}, {
       };
     }
 
-    // d === 3 : événement composé P(X ≥ k)
-    const n = 100;
-    const p = 0.6;
-    const seuil = 65;
-    const pXgeqSeuil = _pr_arr4(1 - Array.from({ length: seuil }, (_, k) => _pr_binomP(n, p, k))
-      .reduce((a, b) => a + b, 0));
-    const ex = n * p;
-    const vx = n * p * (1 - p);
+    // d === 3 : événement composé P(X ≥ k), 2 variantes
+    const variantes3 = [
+      () => {
+        const n = 100;
+        const p = 0.6;
+        const seuil = 65;
+        const pXgeqSeuil = _pr_arr4(1 - Array.from({ length: seuil }, (_, k) => _pr_binomP(n, p, k))
+          .reduce((a, b) => a + b, 0));
+        const ex = n * p;
+        const vx = n * p * (1 - p);
+        return {
+          enonce: `Une étude statistique montre que $60\\,\\%$ des clients d'un site web reviennent dans les 30 jours. ` +
+            `On choisit $n = ${n}$ clients indépendamment et on note $X$ le nombre d'entre eux qui reviennent dans les 30 jours.<br>` +
+            `1. Donner la loi de $X$ et préciser $E(X)$ et $V(X)$.<br>` +
+            `2. Calculer $P(X \\geqslant ${seuil})$ à l'aide de la calculatrice, arrondi à $10^{-4}$.<br>` +
+            `3. Interpréter ce résultat.`,
+          corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}6)$. $E(X) = ${ex}$ et $V(X) = ${vx}$.<br>` +
+            `<strong>2.</strong> $P(X \\geqslant ${seuil}) = 1 - P(X \\leqslant ${seuil - 1})$. À la calculatrice : $P(X \\leqslant ${seuil - 1}) \\approx ${_pr_dec(_pr_arr4(1 - pXgeqSeuil))}$, donc $P(X \\geqslant ${seuil}) \\approx ${_pr_dec(pXgeqSeuil)}$.<br>` +
+            `<strong>3.</strong> Il y a environ $${_pr_dec(_pr_arr4(pXgeqSeuil * 100))}\\,\\%$ de chances d'avoir au moins $${seuil}$ clients qui reviennent.`
+        };
+      },
+      () => {
+        // n=80, p=0,5, seuil=45 → P(X >= 45) à calculer
+        const n = 80;
+        const p = 0.5;
+        const seuil = 45;
+        const pXgeqSeuil = _pr_arr4(1 - Array.from({ length: seuil }, (_, k) => _pr_binomP(n, p, k))
+          .reduce((a, b) => a + b, 0));
+        const ex = n * p;
+        const vx = n * p * (1 - p);
+        return {
+          enonce: `Lors d'un référendum, $50\\,\\%$ des électeurs prévoient de voter "oui". ` +
+            `Un institut interroge $n = ${n}$ électeurs au hasard et de manière indépendante. On note $X$ le nombre d'électeurs déclarant voter "oui".<br>` +
+            `1. Donner la loi de $X$ et préciser $E(X)$ et $V(X)$.<br>` +
+            `2. Calculer $P(X \\geqslant ${seuil})$, arrondi à $10^{-4}$.<br>` +
+            `3. Interpréter ce résultat.`,
+          corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}5)$. $E(X) = ${ex}$ et $V(X) = ${vx}$.<br>` +
+            `<strong>2.</strong> $P(X \\geqslant ${seuil}) = 1 - P(X \\leqslant ${seuil - 1}) \\approx ${_pr_dec(pXgeqSeuil)}$.<br>` +
+            `<strong>3.</strong> Avec une espérance de $${ex}$, observer au moins $${seuil}$ "oui" est un événement de probabilité $${_pr_dec(_pr_arr4(pXgeqSeuil * 100))}\\,\\%$.`
+        };
+      }
+    ];
+    const v3 = pick(variantes3)();
     return {
-      enonce: `Une étude statistique montre que $60\\,\\%$ des clients d'un site web reviennent dans les 30 jours. ` +
-        `On choisit $n = 100$ clients indépendamment et on note $X$ le nombre d'entre eux qui reviennent dans les 30 jours.<br>` +
-        `1. Donner la loi de $X$ et préciser $E(X)$ et $V(X)$.<br>` +
-        `2. Calculer $P(X \\geqslant ${seuil})$ à l'aide de la calculatrice, arrondi à $10^{-4}$.<br>` +
-        `3. Interpréter ce résultat.`,
-      corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}6)$. $E(X) = ${n} \\times 0{,}6 = ${ex}$ et $V(X) = ${n} \\times 0{,}6 \\times 0{,}4 = ${vx}$.<br>` +
-        `<strong>2.</strong> $P(X \\geqslant ${seuil}) = 1 - P(X \\leqslant ${seuil - 1})$. À la calculatrice : $P(X \\leqslant ${seuil - 1}) \\approx ${_pr_dec(_pr_arr4(1 - pXgeqSeuil))}$, donc $P(X \\geqslant ${seuil}) \\approx ${_pr_dec(pXgeqSeuil)}$.<br>` +
-        `<strong>3.</strong> Avec une espérance de $${ex}$ clients revenant en moyenne, la probabilité d'avoir au moins $${seuil}$ clients qui reviennent est d'environ $${_pr_dec(_pr_arr4(pXgeqSeuil * 100))}\\,\\%$.`,
-      rappel: `<strong>Calcul de $P(X \\geqslant k)$ à la calculatrice.</strong> Utiliser la fonction <em>BinomFRép</em> (TI) ou <em>binomFRep</em> (Casio) qui donne $P(X \\leqslant k)$, puis : $P(X \\geqslant k) = 1 - P(X \\leqslant k - 1)$. Attention au $-1$ : c'est l'erreur classique au bac.`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>Calcul de $P(X \\geqslant k)$ à la calculatrice.</strong> Utiliser <em>BinomFRép</em> (TI) ou <em>binomFRep</em> (Casio) qui donne $P(X \\leqslant k)$, puis : $P(X \\geqslant k) = 1 - P(X \\leqslant k - 1)$. Attention au $-1$ : c'est l'erreur classique au bac.`
     };
   },
 
@@ -283,6 +371,21 @@ Object.assign(window.LM_GEN ??= {}, {
               `$n \\geqslant \\dfrac{\\ln(0{,}1)}{\\ln(0{,}9)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.1) / Math.log(0.9)))}$.<br>` +
               `Le plus petit entier vérifiant cette condition est $n = ${nMin}$. Il faut acheter au moins $${nMin}$ tickets pour avoir au moins $90\\,\\%$ de chance d'en avoir un gagnant.`
           };
+        },
+        () => {
+          // Variante : tirage avec remise. p = 0,2, seuil = 0,95
+          // 1 - 0,8^n >= 0,95 ↔ 0,8^n <= 0,05 ↔ n >= ln(0,05)/ln(0,8) ≈ 13,4 → n = 14
+          const p = 0.2;
+          const seuil = 0.95;
+          const nMin = Math.ceil(Math.log(1 - seuil) / Math.log(1 - p));
+          return {
+            enonce: `Dans une boîte, $20\\,\\%$ des objets sont défectueux. On effectue $n$ tirages avec remise et on note $X$ le nombre d'objets défectueux tirés.<br>` +
+              `1. Donner la loi de $X$ et exprimer $P(X = 0)$ en fonction de $n$.<br>` +
+              `2. Déterminer le plus petit entier $n$ tel que $P(X \\geqslant 1) \\geqslant 0{,}95$.`,
+            corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}2)$. $P(X = 0) = 0{,}8^{n}$.<br>` +
+              `<strong>2.</strong> $P(X \\geqslant 1) = 1 - 0{,}8^{n} \\geqslant 0{,}95 \\Leftrightarrow 0{,}8^{n} \\leqslant 0{,}05$. En passant au $\\ln$ : $n \\ln(0{,}8) \\leqslant \\ln(0{,}05)$. Comme $\\ln(0{,}8) < 0$, on inverse : $n \\geqslant \\dfrac{\\ln(0{,}05)}{\\ln(0{,}8)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.05) / Math.log(0.8)))}$.<br>` +
+              `Le plus petit entier convenant est $n = ${nMin}$.`
+          };
         }
       ];
       const v = pick(variantes)();
@@ -294,46 +397,92 @@ Object.assign(window.LM_GEN ??= {}, {
     }
 
     if (d === 2) {
-      // p = 0,02, seuil = 0,5, n_min = ?
-      // 1 - 0,98^n >= 0,5 ↔ 0,98^n <= 0,5 ↔ n >= ln(0,5)/ln(0,98) ≈ 34,3
-      // n >= 35
-      const p = 0.02;
-      const seuil = 0.5;
-      const nMin = Math.ceil(Math.log(1 - seuil) / Math.log(1 - p));
+      const variantes = [
+        () => {
+          // p = 0,02, seuil = 0,5, n_min = 35
+          const p = 0.02;
+          const seuil = 0.5;
+          const nMin = Math.ceil(Math.log(1 - seuil) / Math.log(1 - p));
+          return {
+            enonce: `Une maladie touche $2\\,\\%$ d'une population. On prélève $n$ personnes au hasard de façon indépendante. ` +
+              `On note $X$ le nombre de personnes malades dans l'échantillon.<br>` +
+              `1. Donner la loi de $X$.<br>` +
+              `2. Déterminer le nombre minimal de personnes à prélever pour que la probabilité de trouver au moins un malade soit supérieure ou égale à $0{,}5$.`,
+            corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}02)$.<br>` +
+              `<strong>2.</strong> $P(X \\geqslant 1) = 1 - 0{,}98^{n} \\geqslant 0{,}5 \\Leftrightarrow 0{,}98^{n} \\leqslant 0{,}5$. ` +
+              `$n \\geqslant \\dfrac{\\ln(0{,}5)}{\\ln(0{,}98)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.5) / Math.log(0.98)))}$. Donc $n = ${nMin}$.`
+          };
+        },
+        () => {
+          // Tirage avec remise, p = 0,15, seuil = 0,9
+          const p = 0.15;
+          const seuil = 0.9;
+          const nMin = Math.ceil(Math.log(1 - seuil) / Math.log(1 - p));
+          return {
+            enonce: `Sur une plateforme, $15\\,\\%$ des utilisateurs cliquent sur une publicité. On présente la publicité à $n$ utilisateurs indépendants. ` +
+              `On note $X$ le nombre d'utilisateurs cliquant sur la publicité.<br>` +
+              `1. Donner la loi de $X$.<br>` +
+              `2. Déterminer le nombre minimal $n$ pour que la probabilité d'obtenir au moins un clic soit supérieure ou égale à $0{,}9$.`,
+            corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}15)$.<br>` +
+              `<strong>2.</strong> $P(X \\geqslant 1) = 1 - 0{,}85^{n} \\geqslant 0{,}9 \\Leftrightarrow 0{,}85^{n} \\leqslant 0{,}1$. ` +
+              `$n \\geqslant \\dfrac{\\ln(0{,}1)}{\\ln(0{,}85)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.1) / Math.log(0.85)))}$. Donc $n = ${nMin}$.`
+          };
+        }
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `Une maladie touche $2\\,\\%$ d'une population. On prélève $n$ personnes au hasard de façon indépendante. ` +
-          `On note $X$ le nombre de personnes malades dans l'échantillon.<br>` +
-          `1. Donner la loi de $X$.<br>` +
-          `2. Déterminer le nombre minimal de personnes à prélever pour que la probabilité de trouver au moins un malade soit supérieure ou égale à $0{,}5$. ` +
-          `Donner une interprétation du résultat.`,
-        corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}02)$.<br>` +
-          `<strong>2.</strong> $P(X \\geqslant 1) = 1 - P(X = 0) = 1 - 0{,}98^{n}$. On cherche $n$ tel que $1 - 0{,}98^{n} \\geqslant 0{,}5$, ` +
-          `soit $0{,}98^{n} \\leqslant 0{,}5$, soit $n \\ln(0{,}98) \\leqslant \\ln(0{,}5)$.<br>` +
-          `Comme $\\ln(0{,}98) < 0$ : $n \\geqslant \\dfrac{\\ln(0{,}5)}{\\ln(0{,}98)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.5) / Math.log(0.98)))}$.<br>` +
-          `Le plus petit entier convenant est $n = ${nMin}$. Il faut prélever au moins $${nMin}$ personnes pour avoir plus d'une chance sur deux de détecter au moins un cas.`,
-        rappel: `<strong>Logarithme et inégalité.</strong> Quand $0 < q < 1$, $\\ln(q) < 0$. Diviser par $\\ln(q)$ <em>inverse</em> le sens de l'inégalité. C'est l'erreur la plus fréquente sur les seuils binomiaux : oublier d'inverser l'inégalité.`
+        enonce: v.enonce,
+        corrige: v.corrige,
+        rappel: `<strong>Logarithme et inégalité.</strong> Quand $0 < q < 1$, $\\ln(q) < 0$. Diviser par $\\ln(q)$ <em>inverse</em> le sens de l'inégalité. C'est l'erreur la plus fréquente sur les seuils binomiaux.`
       };
     }
 
-    // d === 3 : double seuil ou comparaison
-    const p = 0.05;
-    const seuil1 = 0.5;
-    const seuil2 = 0.9;
-    const n1 = Math.ceil(Math.log(1 - seuil1) / Math.log(1 - p));
-    const n2 = Math.ceil(Math.log(1 - seuil2) / Math.log(1 - p));
+    // d === 3 : double seuil ou comparaison, 2 variantes
+    const variantes3 = [
+      () => {
+        const p = 0.05;
+        const seuil1 = 0.5;
+        const seuil2 = 0.9;
+        const n1 = Math.ceil(Math.log(1 - seuil1) / Math.log(1 - p));
+        const n2 = Math.ceil(Math.log(1 - seuil2) / Math.log(1 - p));
+        return {
+          enonce: `Lors d'une étude clinique, $5\\,\\%$ des patients présentent un effet indésirable rare. On suit $n$ patients de manière indépendante. ` +
+            `On note $X$ le nombre de patients ayant cet effet.<br>` +
+            `1. Donner la loi de $X$.<br>` +
+            `2. Déterminer $n_1$ pour $P(X \\geqslant 1) \\geqslant 0{,}5$.<br>` +
+            `3. Déterminer $n_2$ pour $P(X \\geqslant 1) \\geqslant 0{,}9$.<br>` +
+            `4. Comparer $n_1$ et $n_2$.`,
+          corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}05)$.<br>` +
+            `<strong>2.</strong> $n \\geqslant \\dfrac{\\ln(0{,}5)}{\\ln(0{,}95)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.5) / Math.log(0.95)))}$, donc $n_1 = ${n1}$.<br>` +
+            `<strong>3.</strong> $n \\geqslant \\dfrac{\\ln(0{,}1)}{\\ln(0{,}95)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.1) / Math.log(0.95)))}$, donc $n_2 = ${n2}$.<br>` +
+            `<strong>4.</strong> Passer de $50\\,\\%$ à $90\\,\\%$ de détection demande de passer de $${n1}$ à $${n2}$ patients : presque ${Math.round(n2 / n1)} fois plus.`
+        };
+      },
+      () => {
+        // p = 0,03, seuils 0,6 et 0,95
+        const p = 0.03;
+        const seuil1 = 0.6;
+        const seuil2 = 0.95;
+        const n1 = Math.ceil(Math.log(1 - seuil1) / Math.log(1 - p));
+        const n2 = Math.ceil(Math.log(1 - seuil2) / Math.log(1 - p));
+        return {
+          enonce: `Dans une production industrielle, $3\\,\\%$ des pièces sont défectueuses. On inspecte $n$ pièces indépendamment. On note $X$ le nombre de pièces défectueuses détectées.<br>` +
+            `1. Donner la loi de $X$.<br>` +
+            `2. Déterminer $n_1$ pour $P(X \\geqslant 1) \\geqslant 0{,}6$.<br>` +
+            `3. Déterminer $n_2$ pour $P(X \\geqslant 1) \\geqslant 0{,}95$.<br>` +
+            `4. Comparer.`,
+          corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}03)$.<br>` +
+            `<strong>2.</strong> $n \\geqslant \\dfrac{\\ln(0{,}4)}{\\ln(0{,}97)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.4) / Math.log(0.97)))}$, donc $n_1 = ${n1}$.<br>` +
+            `<strong>3.</strong> $n \\geqslant \\dfrac{\\ln(0{,}05)}{\\ln(0{,}97)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.05) / Math.log(0.97)))}$, donc $n_2 = ${n2}$.<br>` +
+            `<strong>4.</strong> Passer de $60\\,\\%$ à $95\\,\\%$ demande de $${n1}$ à $${n2}$ pièces.`
+        };
+      }
+    ];
+    const v3 = pick(variantes3)();
     return {
-      enonce: `Lors d'une étude clinique, $5\\,\\%$ des patients présentent un effet indésirable rare. On suit $n$ patients de manière indépendante. ` +
-        `On note $X$ le nombre de patients ayant cet effet.<br>` +
-        `1. Donner la loi de $X$.<br>` +
-        `2. Déterminer le nombre minimal $n_1$ de patients à suivre pour que la probabilité d'observer au moins un cas dépasse $50\\,\\%$.<br>` +
-        `3. Déterminer le nombre minimal $n_2$ pour que cette probabilité dépasse $90\\,\\%$.<br>` +
-        `4. Comparer $n_1$ et $n_2$ : quel est le coût (en taille d'échantillon) pour passer de $50\\,\\%$ à $90\\,\\%$ de chance de détection ?`,
-      corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}05)$.<br>` +
-        `<strong>2.</strong> $P(X \\geqslant 1) = 1 - 0{,}95^{n}$. La condition $1 - 0{,}95^{n} \\geqslant 0{,}5$ équivaut à $n \\geqslant \\dfrac{\\ln(0{,}5)}{\\ln(0{,}95)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.5) / Math.log(0.95)))}$, donc $n_1 = ${n1}$.<br>` +
-        `<strong>3.</strong> De même, $n \\geqslant \\dfrac{\\ln(0{,}1)}{\\ln(0{,}95)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.1) / Math.log(0.95)))}$, donc $n_2 = ${n2}$.<br>` +
-        `<strong>4.</strong> Passer de $50\\,\\%$ à $90\\,\\%$ de détection demande de passer de $${n1}$ à $${n2}$ patients : presque ${Math.round(n2 / n1)} fois plus. ` +
-        `La croissance est ralentie quand on s'approche de $100\\,\\%$ : améliorer la fiabilité de détection coûte de plus en plus cher en taille d'échantillon.`,
-      rappel: `<strong>Coût de la fiabilité.</strong> Pour les seuils binomiaux, $n_{\\min}$ croît à un rythme « logarithmique inverse » par rapport à la probabilité de manquer l'événement. Plus on veut une garantie élevée, plus l'échantillon doit grandir vite — phénomène classique en statistique appliquée.`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>Coût de la fiabilité.</strong> Pour les seuils binomiaux, $n_{\\min}$ croît à un rythme « logarithmique inverse » par rapport à la probabilité de manquer l'événement.`
     };
   },
 
@@ -346,65 +495,119 @@ Object.assign(window.LM_GEN ??= {}, {
   // ============================================================
   rev_bac_proba_va_jeu: (d) => {
     if (d === 1) {
-      // Roulette simple : 36 numéros (1-36), miser sur un numéro
-      // Gain net : +35 si gagne, -1 si perd
-      // P(gagne) = 1/36, P(perd) = 35/36
+      const variantes = [
+        () => ({
+          enonce: `À la roulette, on mise $1$ € sur un numéro entre $1$ et $36$. Si la bille s'arrête sur ce numéro, on gagne $35$ € (en plus de la mise rendue, gain net $35$ €). Sinon, on perd sa mise.<br>` +
+            `Soit $X$ la variable aléatoire égale au gain net du joueur.<br>` +
+            `Donner la loi de probabilité de $X$ sous forme de tableau.`,
+          corrige: `$X$ prend les valeurs $35$ ou $-1$.<br>` +
+            `$P(X = 35) = \\dfrac{1}{36}$ et $P(X = -1) = \\dfrac{35}{36}$.<br>` +
+            `<table style="border-collapse:collapse; margin-top:8px;"><tr><th style="border:1px solid #888; padding:4px 10px;">$x_i$</th><td style="border:1px solid #888; padding:4px 10px;">$-1$</td><td style="border:1px solid #888; padding:4px 10px;">$35$</td></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">$P(X = x_i)$</th><td style="border:1px solid #888; padding:4px 10px;">$\\dfrac{35}{36}$</td><td style="border:1px solid #888; padding:4px 10px;">$\\dfrac{1}{36}$</td></tr></table>` +
+            `<br>Vérification : $\\dfrac{35}{36} + \\dfrac{1}{36} = 1$. ✓`
+        }),
+        () => ({
+          // Tirage d'une urne : 10 boules, 3 rouges (gain 5€), 7 blanches (perte 2€)
+          enonce: `Une urne contient $10$ boules : $3$ rouges et $7$ blanches. On tire une boule au hasard. ` +
+            `Si elle est rouge, on gagne $5$ € ; si elle est blanche, on perd $2$ €.<br>` +
+            `Soit $X$ le gain net du joueur. Donner la loi de probabilité de $X$.`,
+          corrige: `$X$ prend les valeurs $5$ ou $-2$.<br>` +
+            `$P(X = 5) = \\dfrac{3}{10}$ et $P(X = -2) = \\dfrac{7}{10}$.<br>` +
+            `<table style="border-collapse:collapse; margin-top:8px;"><tr><th style="border:1px solid #888; padding:4px 10px;">$x_i$</th><td style="border:1px solid #888; padding:4px 10px;">$-2$</td><td style="border:1px solid #888; padding:4px 10px;">$5$</td></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">$P(X = x_i)$</th><td style="border:1px solid #888; padding:4px 10px;">$\\dfrac{7}{10}$</td><td style="border:1px solid #888; padding:4px 10px;">$\\dfrac{3}{10}$</td></tr></table>` +
+            `<br>Vérification : $\\dfrac{7}{10} + \\dfrac{3}{10} = 1$. ✓`
+        })
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `À la roulette, on mise $1$ € sur un numéro entre $1$ et $36$. Si la bille s'arrête sur ce numéro, on gagne $35$ € ` +
-          `(plus la mise rendue, soit un gain net de $35$ €). Sinon, on perd sa mise.<br>` +
-          `Soit $X$ la variable aléatoire égale au gain net (positif ou négatif) du joueur.<br>` +
-          `Donner la loi de probabilité de $X$ sous forme de tableau.`,
-        corrige: `Les valeurs possibles de $X$ sont $35$ (si la bille s'arrête sur le numéro choisi) ou $-1$ (sinon).<br>` +
-          `$P(X = 35) = \\dfrac{1}{36}$ et $P(X = -1) = \\dfrac{35}{36}$.<br>` +
-          `Tableau de la loi :<br>` +
-          `<table style="border-collapse:collapse; margin-top:8px;"><tr><th style="border:1px solid #888; padding:4px 10px;">$x_i$</th><td style="border:1px solid #888; padding:4px 10px;">$-1$</td><td style="border:1px solid #888; padding:4px 10px;">$35$</td></tr>` +
-          `<tr><th style="border:1px solid #888; padding:4px 10px;">$P(X = x_i)$</th><td style="border:1px solid #888; padding:4px 10px;">$\\dfrac{35}{36}$</td><td style="border:1px solid #888; padding:4px 10px;">$\\dfrac{1}{36}$</td></tr></table>` +
-          `<br>Vérification : $\\dfrac{35}{36} + \\dfrac{1}{36} = 1$.`,
+        enonce: v.enonce,
+        corrige: v.corrige,
         rappel: `<strong>Loi de probabilité d'une VA.</strong> On présente sous forme de tableau les valeurs $x_i$ prises par $X$ avec leurs probabilités $P(X = x_i)$. La somme de toutes ces probabilités doit faire $1$.`
       };
     }
 
     if (d === 2) {
-      // Jeu : lancer un dé. Si on obtient 6, on gagne 5€. Si on obtient 1 ou 2, on perd 2€. Sinon, rien.
-      // Mise : 1€ ? Ou jeu net ?
-      // Simplifions : pas de mise, juste les gains nets.
-      // X = +5 si 6, -2 si 1 ou 2, 0 sinon
-      // P(6) = 1/6, P({1,2}) = 2/6 = 1/3, P({3,4,5}) = 3/6 = 1/2
-      // E(X) = 5·(1/6) + 0·(1/2) + (-2)·(1/3) = 5/6 - 2/3 = 5/6 - 4/6 = 1/6
+      const variantes = [
+        () => ({
+          enonce: `Un joueur lance un dé équilibré à six faces. Les gains (algébriques) sont :<br>` +
+            `- si le dé indique $6$ : il gagne $5$ €<br>` +
+            `- si le dé indique $1$ ou $2$ : il perd $2$ €<br>` +
+            `- sinon : il ne gagne et ne perd rien.<br>` +
+            `On note $X$ le gain net.<br>` +
+            `1. Donner la loi de probabilité de $X$.<br>` +
+            `2. Calculer $E(X)$.<br>` +
+            `3. Le jeu est-il favorable au joueur ?`,
+          corrige: `<strong>1.</strong> $X$ prend les valeurs $5$, $-2$, $0$.<br>` +
+            `$P(X = 5) = \\dfrac{1}{6}$ ; $P(X = -2) = \\dfrac{2}{6} = \\dfrac{1}{3}$ ; $P(X = 0) = \\dfrac{3}{6} = \\dfrac{1}{2}$.<br>` +
+            `Vérif : $\\dfrac{1}{6} + \\dfrac{1}{3} + \\dfrac{1}{2} = 1$. ✓<br>` +
+            `<strong>2.</strong> $E(X) = 5 \\times \\dfrac{1}{6} + (-2) \\times \\dfrac{1}{3} + 0 \\times \\dfrac{1}{2} = \\dfrac{5}{6} - \\dfrac{4}{6} = \\dfrac{1}{6} \\approx 0{,}17$ €.<br>` +
+            `<strong>3.</strong> $E(X) > 0$ : le jeu est <em>favorable</em> au joueur.`
+        }),
+        () => ({
+          // Tirage de 2 boules dans une urne, gain selon couleurs
+          // Urne : 4 rouges (R), 6 blanches (B). On tire 2 boules SIMULTANÉMENT (sans remise).
+          // 2R : gain 5€. P(2R) = C(4,2)/C(10,2) = 6/45 = 2/15
+          // 2B : perte 1€. P(2B) = C(6,2)/C(10,2) = 15/45 = 1/3
+          // 1R+1B : gain 1€. P = 4·6/C(10,2) = 24/45 = 8/15
+          // Vérif somme : 2/15 + 8/15 + 5/15 = 15/15 = 1 ✓ (5/15 = 1/3)
+          // E(X) = 5·(2/15) + 1·(8/15) + (-1)·(5/15) = 10/15 + 8/15 - 5/15 = 13/15 ≈ 0,87
+          enonce: `Une urne contient $4$ boules rouges et $6$ boules blanches. On tire simultanément $2$ boules au hasard. ` +
+            `Les gains sont :<br>` +
+            `- $2$ rouges : gain de $5$ €<br>` +
+            `- $1$ rouge et $1$ blanche : gain de $1$ €<br>` +
+            `- $2$ blanches : perte de $1$ €.<br>` +
+            `On note $X$ le gain net.<br>` +
+            `1. Donner la loi de probabilité de $X$.<br>` +
+            `2. Calculer $E(X)$.<br>` +
+            `3. Le jeu est-il favorable au joueur ?`,
+          corrige: `<strong>1.</strong> Nombre de tirages possibles : $\\dbinom{10}{2} = 45$.<br>` +
+            `$P(X = 5) = \\dfrac{\\binom{4}{2}}{45} = \\dfrac{6}{45} = \\dfrac{2}{15}$ ; ` +
+            `$P(X = 1) = \\dfrac{4 \\times 6}{45} = \\dfrac{24}{45} = \\dfrac{8}{15}$ ; ` +
+            `$P(X = -1) = \\dfrac{\\binom{6}{2}}{45} = \\dfrac{15}{45} = \\dfrac{1}{3}$.<br>` +
+            `<strong>2.</strong> $E(X) = 5 \\times \\dfrac{2}{15} + 1 \\times \\dfrac{8}{15} + (-1) \\times \\dfrac{5}{15} = \\dfrac{10 + 8 - 5}{15} = \\dfrac{13}{15} \\approx 0{,}87$ €.<br>` +
+            `<strong>3.</strong> $E(X) > 0$ : le jeu est <em>favorable</em> au joueur.`
+        })
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `Un joueur lance un dé équilibré à six faces. Les gains (algébriques) sont les suivants :<br>` +
-          `- si le dé indique $6$ : il gagne $5$ €<br>` +
-          `- si le dé indique $1$ ou $2$ : il perd $2$ €<br>` +
-          `- sinon : il ne gagne et ne perd rien.<br>` +
-          `On note $X$ la variable aléatoire égale au gain net.<br>` +
-          `1. Donner la loi de probabilité de $X$.<br>` +
-          `2. Calculer $E(X)$.<br>` +
-          `3. Le jeu est-il favorable au joueur ? Justifier.`,
-        corrige: `<strong>1.</strong> $X$ prend les valeurs $5$, $-2$, $0$.<br>` +
-          `$P(X = 5) = P($obtenir 6$) = \\dfrac{1}{6}$ ; $P(X = -2) = P($obtenir 1 ou 2$) = \\dfrac{2}{6} = \\dfrac{1}{3}$ ; ` +
-          `$P(X = 0) = P($obtenir 3, 4 ou 5$) = \\dfrac{3}{6} = \\dfrac{1}{2}$.<br>` +
-          `Vérif : $\\dfrac{1}{6} + \\dfrac{1}{3} + \\dfrac{1}{2} = \\dfrac{1 + 2 + 3}{6} = 1$. ✓<br>` +
-          `<strong>2.</strong> $E(X) = 5 \\times \\dfrac{1}{6} + (-2) \\times \\dfrac{1}{3} + 0 \\times \\dfrac{1}{2} = \\dfrac{5}{6} - \\dfrac{4}{6} = \\dfrac{1}{6} \\approx 0{,}17$ €.<br>` +
-          `<strong>3.</strong> $E(X) > 0$, donc en jouant un grand nombre de fois, le joueur gagne en moyenne environ $0{,}17$ € par partie. Le jeu est <em>favorable</em> au joueur.`,
-        rappel: `<strong>Espérance et équitabilité.</strong> $E(X) = \\sum x_i\\,P(X = x_i)$. Un jeu est dit <em>équitable</em> si $E(X) = 0$, <em>favorable</em> au joueur si $E(X) > 0$, et <em>défavorable</em> si $E(X) < 0$. L'espérance représente le gain (algébrique) moyen par partie sur le long terme.`
+        enonce: v.enonce,
+        corrige: v.corrige,
+        rappel: `<strong>Espérance et équitabilité.</strong> $E(X) = \\sum x_i\\,P(X = x_i)$. Jeu <em>équitable</em> si $E(X) = 0$, <em>favorable</em> au joueur si $E(X) > 0$, <em>défavorable</em> si $E(X) < 0$.`
       };
     }
 
-    // d === 3 : optimiser la mise / interpréter
+    // d === 3 : optimiser la mise / interpréter, 2 variantes
+    const variantes = [
+      () => ({
+        enonce: `Une loterie propose le jeu suivant : pour une mise de $m$ euros, on tire un ticket parmi $1000$. ` +
+          `Un ticket donne un gros lot de $500$ €, $10$ tickets donnent un lot de $50$ €, $50$ tickets donnent un lot de $5$ €, ` +
+          `les autres ($939$ tickets) ne rapportent rien. Soit $X$ le gain net (lot $-$ mise).<br>` +
+          `1. Exprimer la loi de $X$ en fonction de $m$.<br>` +
+          `2. Calculer $E(X)$ en fonction de $m$.<br>` +
+          `3. Pour quelle valeur de $m$ le jeu est-il équitable ?`,
+        corrige: `<strong>1.</strong> $X$ prend les valeurs $500 - m$, $50 - m$, $5 - m$, $-m$ avec respectivement $\\dfrac{1}{1000}$, $\\dfrac{10}{1000}$, $\\dfrac{50}{1000}$, $\\dfrac{939}{1000}$.<br>` +
+          `<strong>2.</strong> $E(X) = \\dfrac{500 + 500 + 250}{1000} - m = 1{,}25 - m$.<br>` +
+          `<strong>3.</strong> $E(X) = 0 \\Leftrightarrow m = 1{,}25$ €.`
+      }),
+      () => ({
+        // Tombola : 200 tickets. 1 gros lot 100€, 5 lots 20€, 194 sans rien. Mise m
+        // E(gain brut) = 100·(1/200) + 20·(5/200) + 0·(194/200) = 0,5 + 0,5 = 1
+        // E(X) = 1 - m. Équitable si m = 1
+        enonce: `Une tombola propose $200$ tickets : $1$ ticket donne un lot de $100$ €, $5$ tickets donnent un lot de $20$ € chacun, ` +
+          `les $194$ autres ne rapportent rien. Chaque ticket coûte $m$ euros. Soit $X$ le gain net d'un joueur.<br>` +
+          `1. Exprimer la loi de $X$ en fonction de $m$.<br>` +
+          `2. Calculer $E(X)$ en fonction de $m$.<br>` +
+          `3. Pour quelle valeur de $m$ le jeu est-il équitable ?`,
+        corrige: `<strong>1.</strong> $X$ prend les valeurs $100 - m$, $20 - m$, $-m$ avec respectivement $\\dfrac{1}{200}$, $\\dfrac{5}{200}$, $\\dfrac{194}{200}$.<br>` +
+          `<strong>2.</strong> $E(X) = \\dfrac{100 + 100}{200} - m = 1 - m$.<br>` +
+          `<strong>3.</strong> $E(X) = 0 \\Leftrightarrow m = 1$ €.`
+      })
+    ];
+    const v3 = pick(variantes)();
     return {
-      enonce: `Une loterie propose le jeu suivant : pour une mise de $m$ euros, on tire un ticket parmi $1000$. ` +
-        `Un ticket donne un gros lot de $500$ €, $10$ tickets donnent un lot de $50$ €, $50$ tickets donnent un lot de $5$ €, ` +
-        `les autres ($939$ tickets) ne rapportent rien. Soit $X$ le gain net (lot $-$ mise).<br>` +
-        `1. Exprimer la loi de $X$ en fonction de $m$.<br>` +
-        `2. Calculer $E(X)$ en fonction de $m$.<br>` +
-        `3. Pour quelle valeur de $m$ le jeu est-il équitable ?`,
-      corrige: `<strong>1.</strong> $X$ prend les valeurs $500 - m$, $50 - m$, $5 - m$, $-m$.<br>` +
-        `$P(X = 500 - m) = \\dfrac{1}{1000}$ ; $P(X = 50 - m) = \\dfrac{10}{1000} = \\dfrac{1}{100}$ ; ` +
-        `$P(X = 5 - m) = \\dfrac{50}{1000} = \\dfrac{1}{20}$ ; $P(X = -m) = \\dfrac{939}{1000}$.<br>` +
-        `<strong>2.</strong> $E(X) = (500 - m) \\times \\dfrac{1}{1000} + (50 - m) \\times \\dfrac{10}{1000} + (5 - m) \\times \\dfrac{50}{1000} + (-m) \\times \\dfrac{939}{1000}$.<br>` +
-        `$E(X) = \\dfrac{500 + 500 + 250}{1000} - m \\times \\dfrac{1 + 10 + 50 + 939}{1000} = \\dfrac{1250}{1000} - m = 1{,}25 - m$.<br>` +
-        `<strong>3.</strong> Le jeu est équitable lorsque $E(X) = 0$, c'est-à-dire $m = 1{,}25$ €. Si $m < 1{,}25$, le jeu est favorable au joueur ; si $m > 1{,}25$, défavorable.`,
-      rappel: `<strong>Mise équitable.</strong> Dans un jeu à mise $m$, le gain est $\\text{lot} - m$. L'espérance s'écrit $E(X) = E(\\text{lot}) - m$. Le jeu est équitable quand $m = E(\\text{lot})$ (mise égale au gain moyen).`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>Mise équitable.</strong> Dans un jeu à mise $m$, le gain net est $\\text{lot} - m$. L'espérance s'écrit $E(X) = E(\\text{lot}) - m$. Le jeu est équitable quand $m = E(\\text{lot})$.`
     };
   },
 
@@ -463,40 +666,82 @@ Object.assign(window.LM_GEN ??= {}, {
     }
 
     if (d === 2) {
-      // n = 8, p = 0,3, calculer P(X >= 3) à la calculatrice
-      const n = 8;
-      const p = 0.3;
-      const pXleq2 = Array.from({ length: 3 }, (_, k) => _pr_binomP(n, p, k)).reduce((a, b) => a + b, 0);
-      const pXgeq3 = _pr_arr4(1 - pXleq2);
+      const variantes = [
+        () => {
+          const n = 8;
+          const p = 0.3;
+          const pXleq2 = Array.from({ length: 3 }, (_, k) => _pr_binomP(n, p, k)).reduce((a, b) => a + b, 0);
+          const pXgeq3 = _pr_arr4(1 - pXleq2);
+          return {
+            enonce: `Une équipe a une probabilité de gagner un match de $0{,}3$, indépendamment du précédent. ` +
+              `Elle joue $${n}$ matchs. On note $X$ le nombre de matchs gagnés.<br>` +
+              `1. Justifier que $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}3)$ et donner $E(X)$.<br>` +
+              `2. Calculer $P(X \\geqslant 3)$, arrondi à $10^{-4}$.<br>` +
+              `3. Interpréter.`,
+            corrige: `<strong>1.</strong> Chaque match : épreuve de Bernoulli indépendante, $p = 0{,}3$. Donc $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}3)$ et $E(X) = ${_pr_dec(n * p)}$.<br>` +
+              `<strong>2.</strong> $P(X \\geqslant 3) = 1 - P(X \\leqslant 2) \\approx ${_pr_dec(pXgeq3)}$.<br>` +
+              `<strong>3.</strong> Environ $${_pr_dec(_pr_arr4(pXgeq3 * 100))}\\,\\%$ de chances de gagner au moins $3$ matchs sur $${n}$.`
+          };
+        },
+        () => {
+          // n = 15, p = 0,4, P(X >= 7)
+          const n = 15;
+          const p = 0.4;
+          const k0 = 7;
+          const pXleq = Array.from({ length: k0 }, (_, k) => _pr_binomP(n, p, k)).reduce((a, b) => a + b, 0);
+          const pXgeq = _pr_arr4(1 - pXleq);
+          return {
+            enonce: `Un commercial parvient à conclure une vente avec une probabilité $0{,}4$ à chaque appel, indépendamment des autres. ` +
+              `Il effectue $${n}$ appels dans la journée. On note $X$ le nombre de ventes conclues.<br>` +
+              `1. Justifier la loi de $X$ et calculer $E(X)$.<br>` +
+              `2. Calculer $P(X \\geqslant ${k0})$, arrondi à $10^{-4}$.<br>` +
+              `3. Interpréter.`,
+            corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}4)$ et $E(X) = ${n * p}$.<br>` +
+              `<strong>2.</strong> $P(X \\geqslant ${k0}) = 1 - P(X \\leqslant ${k0 - 1}) \\approx ${_pr_dec(pXgeq)}$.<br>` +
+              `<strong>3.</strong> Probabilité de $${_pr_dec(_pr_arr4(pXgeq * 100))}\\,\\%$ de conclure au moins $${k0}$ ventes.`
+          };
+        }
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `Une équipe a une probabilité de gagner un match de $0{,}3$, indépendamment du précédent. ` +
-          `Elle joue $${n}$ matchs. On note $X$ le nombre de matchs gagnés.<br>` +
-          `1. Justifier que $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}3)$ et donner $E(X)$.<br>` +
-          `2. Calculer $P(X \\geqslant 3)$, arrondi à $10^{-4}$.<br>` +
-          `3. Interpréter.`,
-        corrige: `<strong>1.</strong> Chaque match est une épreuve de Bernoulli, indépendantes, succès = gagner ($p = 0{,}3$). ` +
-          `Donc $X \\sim \\mathcal{B}(${n}\\,;\\,0{,}3)$ et $E(X) = ${n} \\times 0{,}3 = ${_pr_dec(n * p)}$.<br>` +
-          `<strong>2.</strong> $P(X \\geqslant 3) = 1 - P(X \\leqslant 2)$. À la calculatrice : $P(X \\leqslant 2) \\approx ${_pr_dec(_pr_arr4(pXleq2))}$, ` +
-          `donc $P(X \\geqslant 3) \\approx ${_pr_dec(pXgeq3)}$.<br>` +
-          `<strong>3.</strong> Il y a environ $${_pr_dec(_pr_arr4(pXgeq3 * 100))}\\,\\%$ de chances de gagner au moins $3$ matchs sur $${n}$, ` +
-          `ce qui est cohérent avec une espérance de $${_pr_dec(n * p)}$ matchs gagnés.`,
-        rappel: `<strong>$P(X \\geqslant k) = 1 - P(X \\leqslant k - 1)$.</strong> Toujours convertir « au moins $k$ » en utilisant la probabilité cumulée $P(X \\leqslant k - 1)$ disponible à la calculatrice (fonction BinomFRép).`
+        enonce: v.enonce,
+        corrige: v.corrige,
+        rappel: `<strong>$P(X \\geqslant k) = 1 - P(X \\leqslant k - 1)$.</strong> Toujours convertir « au moins $k$ » en utilisant la probabilité cumulée disponible à la calculatrice (BinomFRép).`
       };
     }
 
-    // d === 3 : succession avec recherche de seuil
+    // d === 3 : succession avec seuil, 2 variantes
+    const variantes = [
+      () => ({
+        enonce: `Lors d'un concours de tir, la probabilité qu'un archer atteigne la cible est $p = 0{,}4$ à chaque tir, indépendamment des autres. ` +
+          `Il effectue $n$ tirs.<br>` +
+          `1. Quelle est la loi du nombre $X$ de tirs réussis ?<br>` +
+          `2. Exprimer $P(X = 0)$ en fonction de $n$.<br>` +
+          `3. Combien de tirs faut-il pour que la probabilité d'atteindre la cible au moins une fois soit supérieure à $0{,}99$ ?`,
+        corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}4)$.<br>` +
+          `<strong>2.</strong> $P(X = 0) = 0{,}6^{n}$.<br>` +
+          `<strong>3.</strong> $1 - 0{,}6^{n} \\geqslant 0{,}99 \\Leftrightarrow 0{,}6^{n} \\leqslant 0{,}01 \\Leftrightarrow n \\geqslant \\dfrac{\\ln(0{,}01)}{\\ln(0{,}6)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.01) / Math.log(0.6)))}$. ` +
+          `Donc $n = ${Math.ceil(Math.log(0.01) / Math.log(0.6))}$.`
+      }),
+      () => ({
+        // p = 0,25 (1 chance sur 4), seuil 0,9
+        // 1 - 0,75^n >= 0,9 ↔ 0,75^n <= 0,1 ↔ n >= ln(0,1)/ln(0,75) ≈ 8,0 → n = 9
+        enonce: `Lors d'un jeu vidéo, un joueur a une probabilité de $\\dfrac{1}{4}$ de réussir un niveau, indépendamment des essais précédents. ` +
+          `Il joue $n$ parties.<br>` +
+          `1. Quelle est la loi de $X$, nombre de niveaux réussis ?<br>` +
+          `2. Exprimer $P(X = 0)$ en fonction de $n$.<br>` +
+          `3. Combien de parties faut-il pour que la probabilité de réussir au moins une fois soit supérieure à $0{,}9$ ?`,
+        corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}25)$.<br>` +
+          `<strong>2.</strong> $P(X = 0) = 0{,}75^{n}$.<br>` +
+          `<strong>3.</strong> $1 - 0{,}75^{n} \\geqslant 0{,}9 \\Leftrightarrow 0{,}75^{n} \\leqslant 0{,}1 \\Leftrightarrow n \\geqslant \\dfrac{\\ln(0{,}1)}{\\ln(0{,}75)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.1) / Math.log(0.75)))}$. ` +
+          `Donc $n = ${Math.ceil(Math.log(0.1) / Math.log(0.75))}$.`
+      })
+    ];
+    const v3 = pick(variantes)();
     return {
-      enonce: `Lors d'un concours de tir, la probabilité qu'un archer atteigne la cible est $p = 0{,}4$ à chaque tir, indépendamment des autres. ` +
-        `Il effectue $n$ tirs.<br>` +
-        `1. Quelle est la loi du nombre $X$ de tirs réussis ?<br>` +
-        `2. Exprimer $P(X = 0)$ en fonction de $n$.<br>` +
-        `3. Combien de tirs l'archer doit-il effectuer pour que la probabilité d'atteindre la cible au moins une fois soit supérieure à $0{,}99$ ?`,
-      corrige: `<strong>1.</strong> $X \\sim \\mathcal{B}(n\\,;\\,0{,}4)$.<br>` +
-        `<strong>2.</strong> $P(X = 0) = 0{,}6^{n}$.<br>` +
-        `<strong>3.</strong> $P(X \\geqslant 1) = 1 - 0{,}6^{n} \\geqslant 0{,}99$ équivaut à $0{,}6^{n} \\leqslant 0{,}01$, soit $n \\ln(0{,}6) \\leqslant \\ln(0{,}01)$.<br>` +
-        `Comme $\\ln(0{,}6) < 0$ : $n \\geqslant \\dfrac{\\ln(0{,}01)}{\\ln(0{,}6)} \\approx ${_pr_dec(_pr_arr4(Math.log(0.01) / Math.log(0.6)))}$.<br>` +
-        `Le plus petit entier convenant est $n = ${Math.ceil(Math.log(0.01) / Math.log(0.6))}$. L'archer doit effectuer au moins $${Math.ceil(Math.log(0.01) / Math.log(0.6))}$ tirs.`,
-      rappel: `<strong>Combiner Bernoulli et seuil.</strong> Méthode bac standard : (1) modéliser par $\\mathcal{B}(n\\,;\\,p)$, (2) écrire $P(X \\geqslant 1) = 1 - (1-p)^{n}$, (3) résoudre l'inéquation par passage au logarithme, (4) prendre le plus petit entier solution.`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>Combiner Bernoulli et seuil.</strong> Méthode standard : (1) modéliser par $\\mathcal{B}(n\\,;\\,p)$, (2) écrire $P(X \\geqslant 1) = 1 - (1-p)^{n}$, (3) résoudre par passage au logarithme.`
     };
   },
 
@@ -536,42 +781,76 @@ Object.assign(window.LM_GEN ??= {}, {
     }
 
     if (d === 2) {
-      // X1, ..., Xn iid de loi B(p), Mn = (X1 + ... + Xn)/n, E(Mn) = p, V(Mn) = p(1-p)/n
-      // Inégalité de concentration : P(|Mn - p| >= ε) <= p(1-p)/(n ε²)
-      // Cas : p = 0,5 (sondage binaire), n = 100, ε = 0,1
-      // majorant = 0,25 / (100 · 0,01) = 0,25
-      const p = 0.5;
-      const n = 100;
-      const eps = 0.1;
-      const majorant = p * (1 - p) / (n * eps * eps);
+      const variantes = [
+        () => {
+          // p=0,5, n=100, eps=0,1. Majorant = 0,25/(100·0,01) = 0,25
+          const p = 0.5;
+          const n = 100;
+          const eps = 0.1;
+          const majorant = p * (1 - p) / (n * eps * eps);
+          return {
+            enonce: `Pour estimer la proportion $p$ d'individus possédant un trait dans une population, on prélève $n = ${n}$ individus indépendamment ` +
+              `et on note $M_n$ la proportion observée dans l'échantillon.<br>` +
+              `On admet que $E(M_n) = p$ et $V(M_n) = \\dfrac{p(1-p)}{n}$.<br>` +
+              `Dans cet exercice, on suppose $p = ${_pr_dec(p)}$.<br>` +
+              `1. Calculer $E(M_n)$ et $V(M_n)$.<br>` +
+              `2. À l'aide de l'inégalité de Bienaymé-Tchebychev, majorer $P(|M_n - p| \\geqslant ${_pr_dec(eps)})$.`,
+            corrige: `<strong>1.</strong> $E(M_n) = ${_pr_dec(p)}$ et $V(M_n) = \\dfrac{${_pr_dec(p)} \\times ${_pr_dec(1 - p)}}{${n}} = ${_pr_dec(_pr_arr4(p * (1 - p) / n))}$.<br>` +
+              `<strong>2.</strong> $P(|M_n - p| \\geqslant ${_pr_dec(eps)}) \\leqslant \\dfrac{V(M_n)}{${_pr_dec(eps)}^{2}} = \\dfrac{${_pr_dec(_pr_arr4(p * (1 - p) / n))}}{${_pr_dec(eps * eps)}} = ${_pr_dec(_pr_arr4(majorant))}$.`
+          };
+        },
+        () => {
+          // p=0,3, n=200, eps=0,05. V(Mn) = 0,21/200 = 0,00105
+          // Majorant = 0,00105 / 0,0025 = 0,42
+          const p = 0.3;
+          const n = 200;
+          const eps = 0.05;
+          const majorant = p * (1 - p) / (n * eps * eps);
+          return {
+            enonce: `Pour estimer la proportion $p$ de clients satisfaits dans une enseigne, on interroge $n = ${n}$ clients indépendamment ` +
+              `et on note $M_n$ la proportion observée.<br>` +
+              `On admet $E(M_n) = p$ et $V(M_n) = \\dfrac{p(1-p)}{n}$. On suppose $p = ${_pr_dec(p)}$.<br>` +
+              `1. Calculer $E(M_n)$ et $V(M_n)$.<br>` +
+              `2. À l'aide de l'inégalité de Bienaymé-Tchebychev, majorer $P(|M_n - p| \\geqslant ${_pr_dec(eps)})$.`,
+            corrige: `<strong>1.</strong> $E(M_n) = ${_pr_dec(p)}$ et $V(M_n) = \\dfrac{${_pr_dec(p)} \\times ${_pr_dec(1 - p)}}{${n}} = \\dfrac{${_pr_dec(p * (1 - p))}}{${n}} = ${_pr_dec(_pr_arr4(p * (1 - p) / n))}$.<br>` +
+              `<strong>2.</strong> $P(|M_n - p| \\geqslant ${_pr_dec(eps)}) \\leqslant \\dfrac{${_pr_dec(_pr_arr4(p * (1 - p) / n))}}{${_pr_dec(eps * eps)}} = ${_pr_dec(_pr_arr4(majorant))}$.`
+          };
+        }
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `Pour estimer la proportion $p$ d'individus possédant un trait dans une population, on prélève $n = ${n}$ individus indépendamment ` +
-          `et on note $M_n$ la proportion observée dans l'échantillon.<br>` +
-          `On admet que $E(M_n) = p$ et $V(M_n) = \\dfrac{p(1-p)}{n}$.<br>` +
-          `Dans cet exercice, on suppose $p = ${_pr_dec(p)}$.<br>` +
-          `1. Calculer $E(M_n)$ et $V(M_n)$.<br>` +
-          `2. À l'aide de l'inégalité de Bienaymé-Tchebychev, majorer la probabilité que $M_n$ s'écarte de $p$ de plus de $${_pr_dec(eps)}$.`,
-        corrige: `<strong>1.</strong> $E(M_n) = p = ${_pr_dec(p)}$ et $V(M_n) = \\dfrac{${_pr_dec(p)} \\times ${_pr_dec(1 - p)}}{${n}} = \\dfrac{${_pr_dec(p * (1 - p))}}{${n}} = ${_pr_dec(_pr_arr4(p * (1 - p) / n))}$.<br>` +
-          `<strong>2.</strong> $P(|M_n - p| \\geqslant ${_pr_dec(eps)}) \\leqslant \\dfrac{V(M_n)}{${_pr_dec(eps)}^{2}} = \\dfrac{${_pr_dec(_pr_arr4(p * (1 - p) / n))}}{${_pr_dec(eps * eps)}} = ${_pr_dec(_pr_arr4(majorant))}$.`,
-        rappel: `<strong>Concentration sur $M_n$.</strong> Pour une moyenne empirique $M_n = \\dfrac{X_1 + \\ldots + X_n}{n}$ de v.a. iid d'espérance $\\mu$ et variance $\\sigma^2$ : $E(M_n) = \\mu$ et $V(M_n) = \\dfrac{\\sigma^2}{n}$. La variance diminue en $\\dfrac{1}{n}$ : c'est le fondement de la <em>loi des grands nombres</em>.`
+        enonce: v.enonce,
+        corrige: v.corrige,
+        rappel: `<strong>Concentration sur $M_n$.</strong> Pour une moyenne empirique $M_n = \\dfrac{X_1 + \\ldots + X_n}{n}$ : $E(M_n) = \\mu$ et $V(M_n) = \\dfrac{\\sigma^2}{n}$. La variance diminue en $\\dfrac{1}{n}$ : c'est le fondement de la <em>loi des grands nombres</em>.`
       };
     }
 
-    // d === 3 : trouver n minimum
-    // P(|M_n - p| >= 0,05) <= 0,05, avec p = 0,5
-    // Majorant : 0,25/(n × 0,0025) = 100/n
-    // 100/n <= 0,05 ↔ n >= 100/0,05 = 2000
+    // d === 3 : trouver n minimum, 2 variantes
+    const variantes = [
+      () => ({
+        enonce: `On souhaite estimer la proportion $p$ d'électeurs favorables à un candidat. On suppose $p$ inconnue, mais $p(1-p) \\leqslant \\dfrac{1}{4}$. ` +
+          `On note $M_n$ la fréquence observée dans un échantillon de taille $n$.<br>` +
+          `On veut garantir $P(|M_n - p| \\geqslant 0{,}05) \\leqslant 0{,}05$.<br>` +
+          `Quelle taille minimale $n$ d'échantillon faut-il prendre ?`,
+        corrige: `D'après l'inégalité : $P(|M_n - p| \\geqslant \\varepsilon) \\leqslant \\dfrac{p(1-p)}{n \\varepsilon^{2}} \\leqslant \\dfrac{1}{4 n \\varepsilon^{2}}$.<br>` +
+          `Avec $\\varepsilon = 0{,}05$, on veut $\\dfrac{1}{4n \\times 0{,}0025} \\leqslant 0{,}05$, soit $n \\geqslant \\dfrac{1}{4 \\times 0{,}05 \\times 0{,}0025} = 2000$.<br>` +
+          `Il faut un échantillon d'au moins $2000$ personnes.`
+      }),
+      () => ({
+        // ε = 0,02, α = 0,1. n >= 1/(4 · 0,1 · 0,0004) = 1/0,00016 = 6250
+        enonce: `On souhaite estimer une proportion $p$ inconnue dans une population, avec $p(1-p) \\leqslant \\dfrac{1}{4}$. ` +
+          `On note $M_n$ la fréquence observée dans un échantillon de taille $n$.<br>` +
+          `On veut garantir $P(|M_n - p| \\geqslant 0{,}02) \\leqslant 0{,}1$.<br>` +
+          `Quelle taille minimale $n$ d'échantillon faut-il prendre ?`,
+        corrige: `Avec $\\varepsilon = 0{,}02$, on veut $\\dfrac{1}{4n \\times 0{,}0004} \\leqslant 0{,}1$, soit $n \\geqslant \\dfrac{1}{4 \\times 0{,}1 \\times 0{,}0004} = \\dfrac{1}{0{,}00016} = 6250$.<br>` +
+          `Il faut un échantillon d'au moins $6250$ personnes.`
+      })
+    ];
+    const v3 = pick(variantes)();
     return {
-      enonce: `On souhaite estimer la proportion $p$ d'électeurs favorables à un candidat. On suppose $p$ inconnue, mais $p(1-p) \\leqslant \\dfrac{1}{4}$. ` +
-        `On note $M_n$ la fréquence observée dans un échantillon de taille $n$.<br>` +
-        `On veut garantir que $P(|M_n - p| \\geqslant 0{,}05) \\leqslant 0{,}05$ (estimation à $\\pm 5\\,\\%$ avec une fiabilité de $95\\,\\%$).<br>` +
-        `Quelle taille minimale $n$ d'échantillon faut-il prendre ?`,
-      corrige: `D'après l'inégalité de concentration appliquée à $M_n$ : $P(|M_n - p| \\geqslant \\varepsilon) \\leqslant \\dfrac{V(M_n)}{\\varepsilon^{2}} = \\dfrac{p(1-p)}{n \\varepsilon^{2}} \\leqslant \\dfrac{1}{4 n \\varepsilon^{2}}$ ` +
-        `(en utilisant $p(1-p) \\leqslant \\dfrac{1}{4}$).<br>` +
-        `Avec $\\varepsilon = 0{,}05$, la condition $\\dfrac{1}{4n \\times 0{,}05^{2}} \\leqslant 0{,}05$ équivaut à :<br>` +
-        `$\\dfrac{1}{4n \\times 0{,}0025} \\leqslant 0{,}05$, soit $\\dfrac{1}{0{,}01 \\, n} \\leqslant 0{,}05$, soit $0{,}01 \\, n \\geqslant 20$, donc $n \\geqslant 2000$.<br>` +
-        `Il faut donc un échantillon d'au moins $2000$ personnes pour garantir une estimation à $\\pm 5\\,\\%$ avec une fiabilité de $95\\,\\%$.`,
-      rappel: `<strong>Taille d'échantillon par Tchebychev.</strong> Bornes : $p(1-p) \\leqslant \\dfrac{1}{4}$ (maximum atteint en $p = \\dfrac{1}{2}$). En utilisant cette majoration : la taille $n$ minimale pour garantir $P(|M_n - p| \\geqslant \\varepsilon) \\leqslant \\alpha$ est $n \\geqslant \\dfrac{1}{4 \\alpha \\varepsilon^{2}}$.`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>Taille d'échantillon par Tchebychev.</strong> En utilisant $p(1-p) \\leqslant \\dfrac{1}{4}$ : la taille $n$ minimale pour garantir $P(|M_n - p| \\geqslant \\varepsilon) \\leqslant \\alpha$ est $n \\geqslant \\dfrac{1}{4 \\alpha \\varepsilon^{2}}$.`
     };
   },
 
@@ -626,46 +905,78 @@ Object.assign(window.LM_GEN ??= {}, {
     }
 
     if (d === 2) {
-      // À partir d'un tableau d'effectifs
-      // Lycéens : Garçons G / Filles F, Sport S / Pas Sport S̄
-      //         | S  | S̄ | Total
-      // G       | 60 | 90 | 150
-      // F       | 40 | 60 | 100
-      // Total   | 100| 150| 250
-      // Test : G et S indépendants ?
-      // P(G) = 150/250 = 0,6 ; P(S) = 100/250 = 0,4 ; P(G ∩ S) = 60/250 = 0,24
-      // P(G) × P(S) = 0,6 × 0,4 = 0,24 = P(G ∩ S) → indépendants
+      const variantes = [
+        () => ({
+          // Tableau Garçons/Filles, Sport/Pas sport, indépendants
+          enonce: `Le tableau ci-dessous donne la répartition des élèves d'un lycée selon le sexe et la pratique d'un sport en club :<br>` +
+            `<table style="border-collapse:collapse; margin-top:8px;"><tr><th style="border:1px solid #888; padding:4px 10px;"></th><th style="border:1px solid #888; padding:4px 10px;">Sport</th><th style="border:1px solid #888; padding:4px 10px;">Pas de sport</th><th style="border:1px solid #888; padding:4px 10px;">Total</th></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">Garçons</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$60$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$90$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$150$</td></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">Filles</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$40$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$60$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$100$</td></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">Total</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$100$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$150$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$250$</td></tr></table>` +
+            `<br>On choisit un élève au hasard. On note $G$ : « l'élève est un garçon » et $S$ : « pratique un sport ».<br>` +
+            `Les événements $G$ et $S$ sont-ils indépendants ? Justifier.`,
+          corrige: `$P(G) = \\dfrac{150}{250} = 0{,}6$ ; $P(S) = \\dfrac{100}{250} = 0{,}4$ ; $P(G \\cap S) = \\dfrac{60}{250} = 0{,}24$.<br>` +
+            `$P(G) \\times P(S) = 0{,}6 \\times 0{,}4 = 0{,}24 = P(G \\cap S)$. Donc $G$ et $S$ sont <strong>indépendants</strong>.`
+        }),
+        () => ({
+          // Tableau Fumeur/Non Fumeur, Malade/Pas Malade, non indépendants
+          // F : 80 total, M : 30 fumeurs malades, 50 fumeurs sains
+          // NF : 320 total, M : 40 malades, 280 sains
+          // Total 400. Total M = 70, NM = 330.
+          // P(F) = 80/400 = 0,2. P(M) = 70/400 = 0,175. P(F∩M) = 30/400 = 0,075
+          // P(F)·P(M) = 0,2·0,175 = 0,035 ≠ 0,075 → non indépendants
+          enonce: `Le tableau ci-dessous donne la répartition d'un groupe selon le statut de fumeur et la présence d'une affection respiratoire :<br>` +
+            `<table style="border-collapse:collapse; margin-top:8px;"><tr><th style="border:1px solid #888; padding:4px 10px;"></th><th style="border:1px solid #888; padding:4px 10px;">Malade</th><th style="border:1px solid #888; padding:4px 10px;">Sain</th><th style="border:1px solid #888; padding:4px 10px;">Total</th></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">Fumeurs</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$30$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$50$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$80$</td></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">Non-fumeurs</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$40$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$280$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$320$</td></tr>` +
+            `<tr><th style="border:1px solid #888; padding:4px 10px;">Total</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$70$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$330$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$400$</td></tr></table>` +
+            `<br>On choisit une personne au hasard. On note $F$ : « la personne fume » et $M$ : « la personne est malade ».<br>` +
+            `Les événements $F$ et $M$ sont-ils indépendants ? Interpréter.`,
+          corrige: `$P(F) = \\dfrac{80}{400} = 0{,}2$ ; $P(M) = \\dfrac{70}{400} = 0{,}175$ ; $P(F \\cap M) = \\dfrac{30}{400} = 0{,}075$.<br>` +
+            `$P(F) \\times P(M) = 0{,}2 \\times 0{,}175 = 0{,}035$.<br>` +
+            `$P(F \\cap M) = 0{,}075 \\neq 0{,}035$, donc $F$ et $M$ ne sont <strong>pas indépendants</strong>. ` +
+            `Interprétation : le fait d'être fumeur est lié à la maladie (proportion de malades plus élevée chez les fumeurs : $\\dfrac{30}{80} = 0{,}375$, contre $\\dfrac{40}{320} = 0{,}125$ chez les non-fumeurs).`
+        })
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `Le tableau ci-dessous donne la répartition des élèves d'un lycée selon le sexe et la pratique d'un sport en club :<br>` +
-          `<table style="border-collapse:collapse; margin-top:8px;"><tr><th style="border:1px solid #888; padding:4px 10px;"></th><th style="border:1px solid #888; padding:4px 10px;">Sport</th><th style="border:1px solid #888; padding:4px 10px;">Pas de sport</th><th style="border:1px solid #888; padding:4px 10px;">Total</th></tr>` +
-          `<tr><th style="border:1px solid #888; padding:4px 10px;">Garçons</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$60$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$90$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$150$</td></tr>` +
-          `<tr><th style="border:1px solid #888; padding:4px 10px;">Filles</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$40$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$60$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$100$</td></tr>` +
-          `<tr><th style="border:1px solid #888; padding:4px 10px;">Total</th><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$100$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$150$</td><td style="border:1px solid #888; padding:4px 10px; text-align:center;">$250$</td></tr></table>` +
-          `<br>On choisit un élève au hasard. On note $G$ : « l'élève est un garçon » et $S$ : « l'élève pratique un sport ».<br>` +
-          `Les événements $G$ et $S$ sont-ils indépendants ? Justifier.`,
-        corrige: `On a : $P(G) = \\dfrac{150}{250} = 0{,}6$ ; $P(S) = \\dfrac{100}{250} = 0{,}4$ ; $P(G \\cap S) = \\dfrac{60}{250} = 0{,}24$.<br>` +
-          `Calculons $P(G) \\times P(S) = 0{,}6 \\times 0{,}4 = 0{,}24$.<br>` +
-          `Comme $P(G \\cap S) = P(G) \\times P(S) = 0{,}24$, les événements $G$ et $S$ sont <strong>indépendants</strong>.<br>` +
-          `Interprétation : la pratique d'un sport ne dépend pas du sexe dans ce lycée (les proportions de sportifs sont les mêmes chez les garçons et les filles, à savoir $\\dfrac{60}{150} = \\dfrac{40}{100} = 0{,}4$).`,
-        rappel: `<strong>Tester l'indépendance avec un tableau.</strong> Calculer $P(A)$, $P(B)$ et $P(A \\cap B)$ à partir des effectifs (probabilité = effectif / total). Puis comparer $P(A \\cap B)$ et $P(A) \\times P(B)$.`
+        enonce: v.enonce,
+        corrige: v.corrige,
+        rappel: `<strong>Tester l'indépendance avec un tableau.</strong> Calculer $P(A)$, $P(B)$ et $P(A \\cap B)$ à partir des effectifs (probabilité = effectif / total), puis comparer $P(A \\cap B)$ et $P(A) \\times P(B)$.`
       };
     }
 
-    // d === 3 : équivalence et caractérisation
+    // d === 3 : équivalence et caractérisation, 2 variantes
+    const variantes = [
+      () => ({
+        enonce: `Soient $A$ et $B$ deux événements de probabilités strictement positives.<br>` +
+          `1. Démontrer que $A$ et $B$ sont indépendants si et seulement si $P_A(B) = P(B)$.<br>` +
+          `2. Application : on lance deux dés équilibrés. Soit $A$ : « le premier dé donne un nombre pair » et $B$ : « la somme des deux dés est paire ». ` +
+          `Les événements $A$ et $B$ sont-ils indépendants ?`,
+        corrige: `<strong>1.</strong> Par définition : $P_A(B) = \\dfrac{P(A \\cap B)}{P(A)}$.<br>` +
+          `$A$ et $B$ indépendants $\\iff P(A \\cap B) = P(A) \\times P(B) \\iff \\dfrac{P(A \\cap B)}{P(A)} = P(B) \\iff P_A(B) = P(B)$. CQFD.<br>` +
+          `<strong>2.</strong> $P(A) = \\dfrac{1}{2}$. La somme est paire ssi les deux dés ont la même parité, donc $P(B) = \\dfrac{18}{36} = \\dfrac{1}{2}$. ` +
+          `Pour $A \\cap B$ : premier dé pair ET somme paire ⟹ second dé pair aussi, donc $P(A \\cap B) = \\dfrac{9}{36} = \\dfrac{1}{4}$.<br>` +
+          `$P(A) \\times P(B) = \\dfrac{1}{4} = P(A \\cap B)$, donc $A$ et $B$ sont <strong>indépendants</strong>.`
+      }),
+      () => ({
+        // Tirage carte dans jeu 32 cartes
+        // A : "carte rouge" (16/32 = 1/2). B : "as" (4/32 = 1/8). A ∩ B : as rouge (2/32 = 1/16)
+        // P(A)·P(B) = 1/2 · 1/8 = 1/16 = P(A∩B) → indépendants
+        enonce: `Soient $A$ et $B$ deux événements de probabilités strictement positives.<br>` +
+          `1. Démontrer que $A$ et $B$ sont indépendants si et seulement si $P_A(B) = P(B)$.<br>` +
+          `2. Application : on tire une carte au hasard dans un jeu de $32$ cartes. Soit $A$ : « la carte est rouge » et $B$ : « la carte est un as ». ` +
+          `Les événements $A$ et $B$ sont-ils indépendants ?`,
+        corrige: `<strong>1.</strong> $P_A(B) = \\dfrac{P(A \\cap B)}{P(A)}$. Indépendance $\\iff P(A \\cap B) = P(A) P(B) \\iff P_A(B) = P(B)$.<br>` +
+          `<strong>2.</strong> $P(A) = \\dfrac{16}{32} = \\dfrac{1}{2}$ ; $P(B) = \\dfrac{4}{32} = \\dfrac{1}{8}$ ; $P(A \\cap B) = \\dfrac{2}{32} = \\dfrac{1}{16}$ (deux as rouges).<br>` +
+          `$P(A) \\times P(B) = \\dfrac{1}{2} \\times \\dfrac{1}{8} = \\dfrac{1}{16} = P(A \\cap B)$, donc $A$ et $B$ sont <strong>indépendants</strong>.`
+      })
+    ];
+    const v3 = pick(variantes)();
     return {
-      enonce: `Soient $A$ et $B$ deux événements de probabilités strictement positives.<br>` +
-        `1. Démontrer que $A$ et $B$ sont indépendants si et seulement si $P_A(B) = P(B)$.<br>` +
-        `2. Application : on lance deux dés équilibrés. Soit $A$ : « le premier dé donne un nombre pair » et $B$ : « la somme des deux dés est paire ». ` +
-        `Les événements $A$ et $B$ sont-ils indépendants ?`,
-      corrige: `<strong>1.</strong> Par définition de la probabilité conditionnelle : $P_A(B) = \\dfrac{P(A \\cap B)}{P(A)}$ (car $P(A) > 0$).<br>` +
-        `$\\quad A$ et $B$ indépendants $\\iff P(A \\cap B) = P(A) \\times P(B) \\iff \\dfrac{P(A \\cap B)}{P(A)} = P(B) \\iff P_A(B) = P(B)$. CQFD.<br>` +
-        `<strong>2.</strong> $P(A) = \\dfrac{3}{6} = \\dfrac{1}{2}$ (3 issues paires sur 6).<br>` +
-        `Pour $B$ : la somme est paire ssi les deux dés ont la même parité (pair + pair ou impair + impair). ` +
-        `$P(B) = \\dfrac{18}{36} = \\dfrac{1}{2}$ (3 × 3 + 3 × 3 = 18 issues sur 36).<br>` +
-        `Pour $A \\cap B$ : premier dé pair ET somme paire ⟹ second dé pair aussi. $P(A \\cap B) = \\dfrac{3 \\times 3}{36} = \\dfrac{1}{4}$.<br>` +
-        `$P(A) \\times P(B) = \\dfrac{1}{2} \\times \\dfrac{1}{2} = \\dfrac{1}{4} = P(A \\cap B)$. Les événements $A$ et $B$ sont <strong>indépendants</strong>.`,
-      rappel: `<strong>Caractérisations équivalentes de l'indépendance.</strong> Pour $P(A) > 0$ et $P(B) > 0$ : $A$ et $B$ indépendants $\\iff P(A \\cap B) = P(A)\\,P(B) \\iff P_A(B) = P(B) \\iff P_B(A) = P(A)$. ` +
-        `La 2ème forme se lit « savoir que $A$ est réalisé ne modifie pas la probabilité de $B$ ».`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>Caractérisations équivalentes de l'indépendance.</strong> Pour $P(A), P(B) > 0$ : $A, B$ indépendants $\\iff P(A \\cap B) = P(A)\\,P(B) \\iff P_A(B) = P(B) \\iff P_B(A) = P(A)$.`
     };
   }
 
