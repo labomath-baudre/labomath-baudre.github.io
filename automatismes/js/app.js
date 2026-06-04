@@ -702,9 +702,25 @@ function construireArbre() {
   if (profil === 'terminale_spe') {
     const moduleRev = racine.querySelector('.noeud[data-id="revisions"]');
     if (moduleRev) {
-      // Déplier le module lui-même et tous ses sous-thèmes (pas les feuilles, qui n'ont pas d'enfants)
+      // Déplier le module RÉVISIONS et tous ses sous-thèmes (sauf rev_annales, voir plus bas)
       moduleRev.querySelectorAll('.enfants').forEach(e => e.style.display = 'block');
       moduleRev.querySelectorAll('.triangle:not(.vide)').forEach(t => t.classList.add('ouvert'));
+
+      // EXCEPTION : pour la branche Annales (qui a beaucoup de sous-rubriques),
+      // ne déplier que la PREMIÈRE sous-rubrique, replier les autres.
+      const annales = moduleRev.querySelector('.noeud[data-id="rev_annales"]');
+      if (annales) {
+        // Garder rev_annales lui-même déplié (sa liste de sous-rubriques visible),
+        // mais replier chaque sous-rubrique sauf la première.
+        const sousRubriques = annales.querySelectorAll(':scope > .enfants > .noeud');
+        sousRubriques.forEach((sr, i) => {
+          if (i === 0) return; // première : déjà dépliée ci-dessus, on la laisse
+          const enfantsSr = sr.querySelector(':scope > .enfants');
+          if (enfantsSr) enfantsSr.style.display = 'none';
+          const triangleSr = sr.querySelector(':scope > .ligne .triangle:not(.vide)');
+          if (triangleSr) triangleSr.classList.remove('ouvert');
+        });
+      }
     }
   }
 }
