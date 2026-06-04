@@ -433,42 +433,64 @@ Object.assign(window.LM_GEN ??= {}, {
     }
 
     if (d === 2) {
-      // (E) : y' = ay + h(x), g solution particulière donnée
-      // Démontrer : f solution de (E) <=> f - g solution de l'homogène
-      // En déduire les solutions
+      const variantes = [
+        () => ({
+          enonce: `On considère l'équation différentielle $(E) : y' = 2\\,y - 4x + 3$ et la fonction $g$ définie sur $\\mathbb{R}$ par $g(x) = 2x - \\dfrac{1}{2}$.<br>` +
+            `1. Vérifier que $g$ est solution de $(E)$.<br>` +
+            `2. Démontrer que $f$ est solution de $(E)$ ssi $h = f - g$ est solution de $(H) : y' = 2y$.<br>` +
+            `3. En déduire l'ensemble des solutions de $(E)$.`,
+          corrige: `<strong>1.</strong> $g'(x) = 2$ et $2g(x) - 4x + 3 = 4x - 1 - 4x + 3 = 2$. ✓<br>` +
+            `<strong>2.</strong> $h = f - g$, $h' = f' - g' = (2f - 4x + 3) - (2g - 4x + 3) = 2h$.<br>` +
+            `<strong>3.</strong> Solutions de $(H)$ : $h(x) = C\\,e^{2x}$. Solutions de $(E)$ : $f(x) = C\\,e^{2x} + 2x - \\dfrac{1}{2}$, $C \\in \\mathbb{R}$.`
+        }),
+        () => ({
+          // (E) : y' = 3y - 6x - 1, g(x) = 2x + 1
+          enonce: `On considère l'équation différentielle $(E) : y' = 3y - 6x - 1$ et la fonction $g$ définie sur $\\mathbb{R}$ par $g(x) = 2x + 1$.<br>` +
+            `1. Vérifier que $g$ est solution de $(E)$.<br>` +
+            `2. Démontrer que $f$ est solution de $(E)$ ssi $h = f - g$ est solution de $(H) : y' = 3y$.<br>` +
+            `3. En déduire l'ensemble des solutions de $(E)$.`,
+          corrige: `<strong>1.</strong> $g'(x) = 2$ et $3g(x) - 6x - 1 = 6x + 3 - 6x - 1 = 2$. ✓<br>` +
+            `<strong>2.</strong> $h = f - g$, $h' = f' - g' = 3(f - g) = 3h$.<br>` +
+            `<strong>3.</strong> Solutions de $(H)$ : $h(x) = C\\,e^{3x}$. Solutions de $(E)$ : $f(x) = C\\,e^{3x} + 2x + 1$, $C \\in \\mathbb{R}$.`
+        })
+      ];
+      const v = pick(variantes)();
       return {
-        enonce: `On considère l'équation différentielle $(E) : y' = 2\\,y - 4x + 3$ et la fonction $g$ définie sur $\\mathbb{R}$ par $g(x) = 2x - \\dfrac{1}{2}$.<br>` +
-          `1. Vérifier que $g$ est solution de $(E)$.<br>` +
-          `2. Démontrer que $f$ est solution de $(E)$ si, et seulement si, $h = f - g$ est solution de l'équation homogène $(H) : y' = 2\\,y$.<br>` +
-          `3. En déduire l'ensemble des solutions de $(E)$ sur $\\mathbb{R}$.`,
-        corrige: `<strong>1.</strong> $g'(x) = 2$ et $2\\,g(x) - 4x + 3 = 2(2x - \\dfrac{1}{2}) - 4x + 3 = 4x - 1 - 4x + 3 = 2$.<br>` +
-          `Donc $g'(x) = 2\\,g(x) - 4x + 3$ : $g$ est solution de $(E)$.<br>` +
-          `<strong>2.</strong> Posons $h = f - g$. Alors $h' = f' - g'$.<br>` +
-          `$f$ solution de $(E)$ $\\iff$ $f' = 2\\,f - 4x + 3$.<br>` +
-          `Or $g' = 2\\,g - 4x + 3$, donc $f' - g' = 2\\,f - 2\\,g = 2(f - g)$, soit $h' = 2\\,h$.<br>` +
-          `Donc $f$ solution de $(E)$ $\\iff$ $h = f - g$ solution de $(H)$.<br>` +
-          `<strong>3.</strong> Les solutions de $(H)$ sont $h(x) = C\\,e^{2x}$, $C \\in \\mathbb{R}$.<br>` +
-          `Donc les solutions de $(E)$ sont $f(x) = C\\,e^{2x} + 2x - \\dfrac{1}{2}$, $C \\in \\mathbb{R}$.`,
-        rappel: `<strong>Structure des solutions d'une EDL.</strong> Solution générale = solution particulière + solution générale de l'équation homogène. C'est la conséquence de la linéarité : $(E)$ et $(H)$ ont le même premier membre, donc $f - g$ vérifie $(H)$ dès que $f$ et $g$ vérifient $(E)$.`
+        enonce: v.enonce,
+        corrige: v.corrige,
+        rappel: `<strong>Structure des solutions d'une EDL.</strong> Solution générale = solution particulière + solution générale de l'équation homogène.`
       };
     }
 
-    // d === 3 : avec CI complète, calibré sur sujets bac
+    // d === 3 : avec CI, 2 variantes
+    const variantes = [
+      () => ({
+        enonce: `On considère $(E) : y' + y = x\\,e^{-x}$ et $g(x) = \\dfrac{x^{2}}{2}\\,e^{-x}$.<br>` +
+          `1. Vérifier que $g$ est solution de $(E)$.<br>` +
+          `2. Démontrer que $f$ solution de $(E)$ ssi $f - g$ solution de $(H) : y' + y = 0$.<br>` +
+          `3. Résoudre $(E)$ et déterminer l'unique solution $f$ avec $f(0) = 1$.`,
+        corrige: `<strong>1.</strong> $g'(x) = x\\,e^{-x} - \\dfrac{x^{2}}{2}\\,e^{-x}$. $g' + g = x\\,e^{-x}$. ✓<br>` +
+          `<strong>2.</strong> $h = f - g$ : $h' + h = 0$.<br>` +
+          `<strong>3.</strong> $(H)$ : $h(x) = C\\,e^{-x}$. $f(x) = \\left(C + \\dfrac{x^{2}}{2}\\right)e^{-x}$. $f(0) = 1 \\Rightarrow C = 1$. ` +
+          `Solution : $f(x) = \\left(1 + \\dfrac{x^{2}}{2}\\right)e^{-x}$.`
+      }),
+      () => ({
+        // (E) : y' - 2y = e^(2x), g(x) = x·e^(2x), CI f(0) = 2
+        enonce: `On considère $(E) : y' - 2y = e^{2x}$ et $g(x) = x\\,e^{2x}$.<br>` +
+          `1. Vérifier que $g$ est solution de $(E)$.<br>` +
+          `2. Démontrer que $f$ solution de $(E)$ ssi $f - g$ solution de $(H) : y' - 2y = 0$.<br>` +
+          `3. Résoudre $(E)$ et déterminer l'unique solution $f$ avec $f(0) = 2$.`,
+        corrige: `<strong>1.</strong> $g'(x) = e^{2x} + 2x\\,e^{2x}$. $g' - 2g = e^{2x}$. ✓<br>` +
+          `<strong>2.</strong> $h = f - g$ : $h' - 2h = 0$.<br>` +
+          `<strong>3.</strong> $(H)$ : $h(x) = C\\,e^{2x}$. $f(x) = (C + x)\\,e^{2x}$. $f(0) = 2 \\Rightarrow C = 2$. ` +
+          `Solution : $f(x) = (2 + x)\\,e^{2x}$.`
+      })
+    ];
+    const v3 = pick(variantes)();
     return {
-      enonce: `On considère l'équation différentielle $(E) : y' + y = x\\,e^{-x}$ et la fonction $g$ définie sur $\\mathbb{R}$ par $g(x) = \\dfrac{x^{2}}{2}\\,e^{-x}$.<br>` +
-        `1. Vérifier que $g$ est solution de $(E)$.<br>` +
-        `2. Démontrer que $f$ est solution de $(E)$ si, et seulement si, $f - g$ est solution de l'équation homogène $(H) : y' + y = 0$.<br>` +
-        `3. Résoudre $(E)$ puis déterminer l'unique solution $f$ vérifiant $f(0) = 1$.`,
-      corrige: `<strong>1.</strong> $g$ est dérivable sur $\\mathbb{R}$. Avec $u(x) = \\dfrac{x^{2}}{2}$, $v(x) = e^{-x}$ : $u'(x) = x$, $v'(x) = -e^{-x}$.<br>` +
-        `$g'(x) = x\\,e^{-x} - \\dfrac{x^{2}}{2}\\,e^{-x}$.<br>` +
-        `On calcule $g'(x) + g(x) = x\\,e^{-x} - \\dfrac{x^{2}}{2}\\,e^{-x} + \\dfrac{x^{2}}{2}\\,e^{-x} = x\\,e^{-x}$. Donc $g$ est solution.<br>` +
-        `<strong>2.</strong> Posons $h = f - g$. $h' = f' - g'$.<br>` +
-        `$f$ solution de $(E)$ $\\iff$ $f' + f = x\\,e^{-x}$. Comme $g' + g = x\\,e^{-x}$, on a $(f' - g') + (f - g) = 0$, soit $h' + h = 0$.<br>` +
-        `Donc $f$ solution de $(E)$ $\\iff$ $h = f - g$ solution de $(H)$.<br>` +
-        `<strong>3.</strong> $(H)$ : $y' = -y$. Solutions : $h(x) = C\\,e^{-x}$.<br>` +
-        `Donc solutions de $(E)$ : $f(x) = C\\,e^{-x} + \\dfrac{x^{2}}{2}\\,e^{-x} = \\left(C + \\dfrac{x^{2}}{2}\\right)e^{-x}$.<br>` +
-        `Condition $f(0) = 1$ : $C \\cdot 1 = 1$, donc $C = 1$. Solution : $f(x) = \\left(1 + \\dfrac{x^{2}}{2}\\right)e^{-x}$.`,
-      rappel: `<strong>EDL avec second membre variable.</strong> Méthode classique au bac : (1) l'énoncé donne une solution particulière $g$ ; (2) on démontre que $f$ solution $\\iff$ $f - g$ solution de l'homogène ; (3) on en déduit l'ensemble des solutions, puis on applique la CI.`
+      enonce: v3.enonce,
+      corrige: v3.corrige,
+      rappel: `<strong>EDL avec second membre variable.</strong> Méthode : (1) vérifier $g$ solution particulière ; (2) montrer $f \\in \\mathcal{S}_{(E)} \\iff f - g \\in \\mathcal{S}_{(H)}$ ; (3) résoudre $(H)$ et déduire $(E)$.`
     };
   },
 
