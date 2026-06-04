@@ -31,11 +31,11 @@ title: BTS CIEL — Passerelle
     <div class="semaines">
       <a href="{{ '/passerelle/docs/semaines/parcours-ciel-s1.pdf' | relative_url }}">
         <span class="num">1</span>
-        <span class="theme">Calcul et fractions</span>
+        <span class="theme">Calcul, formules et unités</span>
       </a>
       <a href="{{ '/passerelle/docs/semaines/parcours-ciel-s2.pdf' | relative_url }}">
         <span class="num">2</span>
-        <span class="theme">Puissances et racines</span>
+        <span class="theme">Proportionnalité et géométrie de base</span>
       </a>
       <a href="{{ '/passerelle/docs/semaines/parcours-ciel-s3.pdf' | relative_url }}">
         <span class="num">3</span>
@@ -47,11 +47,11 @@ title: BTS CIEL — Passerelle
       </a>
       <a href="{{ '/passerelle/docs/semaines/parcours-ciel-s5.pdf' | relative_url }}">
         <span class="num">5</span>
-        <span class="theme">Fonctions et dérivation</span>
+        <span class="theme">Fonctions et lecture graphique</span>
       </a>
       <a href="{{ '/passerelle/docs/semaines/parcours-ciel-s6.pdf' | relative_url }}">
         <span class="num">6</span>
-        <span class="theme">Équations</span>
+        <span class="theme">Dérivation</span>
       </a>
     </div>
   </div>
