@@ -702,32 +702,13 @@ function construireArbre() {
   if (profil === 'terminale_spe') {
     const moduleRev = racine.querySelector('.noeud[data-id="revisions"]');
     if (moduleRev) {
-      // 1) Déplier le module RÉVISIONS lui-même
+      // Déplier UNIQUEMENT le module RÉVISIONS : on voit la liste de ses branches
+      // (Annales, Suites, Exp/Log, Probas, etc.), toutes repliées par défaut.
+      // L'utilisateur clique sur le ▶ de la branche qu'il veut explorer.
       const enfantsRev = moduleRev.querySelector(':scope > .enfants');
       if (enfantsRev) enfantsRev.style.display = 'block';
       const triangleRev = moduleRev.querySelector(':scope > .ligne .triangle:not(.vide)');
       if (triangleRev) triangleRev.classList.add('ouvert');
-
-      // 2) Pour la branche Annales : déplier rev_annales (liste visible)
-      //    + sa PREMIÈRE sous-rubrique. Les autres sous-rubriques restent repliées.
-      const annales = moduleRev.querySelector('.noeud[data-id="rev_annales"]');
-      if (annales) {
-        const enfantsAnnales = annales.querySelector(':scope > .enfants');
-        if (enfantsAnnales) enfantsAnnales.style.display = 'block';
-        const triangleAnnales = annales.querySelector(':scope > .ligne .triangle:not(.vide)');
-        if (triangleAnnales) triangleAnnales.classList.add('ouvert');
-
-        const premiere = annales.querySelector(':scope > .enfants > .noeud:first-child');
-        if (premiere) {
-          const enfantsPremiere = premiere.querySelector(':scope > .enfants');
-          if (enfantsPremiere) enfantsPremiere.style.display = 'block';
-          const trianglePremiere = premiere.querySelector(':scope > .ligne .triangle:not(.vide)');
-          if (trianglePremiere) trianglePremiere.classList.add('ouvert');
-        }
-      }
-
-      // 3) Les autres modules de RÉVISIONS (Suites, Exp/Log, Probas, etc.)
-      //    restent REPLIÉS par défaut (l'utilisateur clique sur le ▶ pour les ouvrir).
     }
   }
 }
