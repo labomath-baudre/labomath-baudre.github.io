@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
   <!-- MathJax en mode SVG : produit des formules en SVG natif, capturables par html2canvas -->
-  <script>
+ <script>
     window.MathJax = {
       tex: {
         inlineMath: [['$', '$']],
@@ -19,7 +19,13 @@
         scale: 1.05  // taille des formules
       },
       options: {
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'svg']
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'svg'],
+        // Désactive le rendu MathML d'accessibilité (lecteurs d'écran).
+        // Sans cette option, MathJax génère pour chaque formule un doublon caché
+        // (clip CSS) que html2canvas capture par erreur, causant un doublonnage
+        // visible dans le PDF.
+        menuOptions: { settings: { assistiveMml: false } },
+        enableAssistiveMml: false
       }
     };
   </script>
